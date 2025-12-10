@@ -20,11 +20,16 @@ export function getPool(): mysql.Pool {
     // Parse MySQL connection string
     // Format: mysql://user:password@host:port/database
     const url = new URL(connectionString);
+    
+    // Decode password and username properly (URL encoded characters like %24 for $, %7B for {, etc.)
+    const decodedPassword = url.password ? decodeURIComponent(url.password) : "";
+    const decodedUsername = url.username ? decodeURIComponent(url.username) : "";
+    
     const config = {
       host: url.hostname,
       port: parseInt(url.port || "3306", 10),
-      user: url.username,
-      password: url.password,
+      user: decodedUsername,
+      password: decodedPassword,
       database: url.pathname.slice(1), // Remove leading /
       waitForConnections: true,
       connectionLimit: 10,
