@@ -1,4 +1,4 @@
-import { executeQuery, executeSingleQuery } from "./db-neon";
+import { executeQuery, executeSingleQuery } from "./db-mysql";
 import { v4 as uuidv4 } from "uuid";
 
 export interface UserProfile {

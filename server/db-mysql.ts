@@ -1,8 +1,8 @@
-import { Pool } from "@neondatabase/serverless";
+import mysql from "mysql2/promise";
 
-let pool: Pool | null = null;
+let pool: mysql.Pool | null = null;
 
-export function getPool(): Pool {
+export function getPool(): mysql.Pool {
   if (!pool) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
@@ -14,27 +14,60 @@ export function getPool(): Pool {
       );
       throw new Error("DATABASE_URL environment variable is not set");
     }
-    console.log("[getPool] Creating new pool with DATABASE_URL");
-    pool = new Pool({ connectionString });
+
+    console.log("[getPool] Creating new MySQL pool with DATABASE_URL");
+
+    // Parse MySQL connection string
+    // Format: mysql://user:password@host:port/database
+    const url = new URL(connectionString);
+    const config = {
+      host: url.hostname,
+      port: parseInt(url.port || "3306", 10),
+      user: url.username,
+      password: url.password,
+      database: url.pathname.slice(1), // Remove leading /
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelayMs: 0,
+    };
+
+    console.log(
+      `[getPool] MySQL Config: host=${config.host}, port=${config.port}, user=${config.user}, database=${config.database}`,
+    );
+
+    pool = mysql.createPool(config);
   }
   return pool;
 }
 
 export async function executeQuery(sql: string, params: any[] = []) {
   try {
-    const client = await getPool().connect();
+    const connection = await getPool().getConnection();
     try {
       console.log(
         "[executeQuery] Executing SQL:",
-        sql.substring(0, 50),
+        sql.substring(0, 100),
         "params:",
         params,
       );
-      const result = await client.query(sql, params);
-      console.log("[executeQuery] Query successful, rows:", result.rows.length);
-      return result;
+
+      // Convert PostgreSQL placeholders ($1, $2) to MySQL placeholders (?)
+      const mysqlSql = convertPostgresToMysql(sql);
+      const [results] = await connection.query(mysqlSql, params);
+
+      console.log(
+        "[executeQuery] Query successful, rows:",
+        Array.isArray(results) ? results.length : 0,
+      );
+
+      return {
+        rows: Array.isArray(results) ? results : [],
+        rowCount: Array.isArray(results) ? results.length : 0,
+      };
     } finally {
-      client.release();
+      connection.release();
     }
   } catch (err) {
     console.error(
@@ -58,6 +91,11 @@ export async function executeSingleQuery(sql: string, params: any[] = []) {
     );
     throw err;
   }
+}
+
+function convertPostgresToMysql(sql: string): string {
+  // Convert $1, $2, etc. to ?
+  return sql.replace(/\$\d+/g, "?");
 }
 
 export async function seedVideos() {
@@ -347,8 +385,8 @@ export async function seedVideos() {
       const reward = getVideoReward();
       await executeQuery(
         `INSERT INTO videos (id, title, description, url, thumbnail, reward_min, reward_max, duration)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (id) DO NOTHING`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE id=id`,
         [
           video.id,
           video.title,

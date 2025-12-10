@@ -14,7 +14,7 @@ import {
   handleCreateWithdrawal,
   handleGetWithdrawals,
 } from "./routes/withdrawals";
-import { seedVideos } from "./db-neon";
+import { seedVideos } from "./db-mysql";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
