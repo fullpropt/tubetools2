@@ -89,7 +89,7 @@ export const handleGetDailyVotes: RequestHandler = async (req, res) => {
     }
 
     const dailyVotes = await getDailyVoteCount(email);
-    const remaining = Math.max(0, 7 - dailyVotes);
+    const remaining = Math.max(0, 10 - dailyVotes);
 
     // Get total votes for this user (all time)
     const totalVotes = userData.votes.length;
@@ -214,11 +214,11 @@ export const handleVote: RequestHandler = async (req, res) => {
       user.votingDaysCount = (user.votingDaysCount || 0) + 1;
     }
 
-    // Check daily vote limit (1-7 votes per day)
+    // Check daily vote limit (10 votes per day)
     const dailyVotes = await getDailyVoteCount(email);
-    if (dailyVotes >= 7) {
+    if (dailyVotes >= 10) {
       res.status(400).json({
-        error: "You've reached your daily vote limit (7 votes)",
+        error: "You've reached your daily vote limit (10 votes)",
         dailyVotesRemaining: 0,
       });
       return;
@@ -279,7 +279,7 @@ export const handleVote: RequestHandler = async (req, res) => {
     // Add transaction
     await addTransaction(email, transaction);
 
-    const dailyVotesRemaining = 7 - (dailyVotes + 1);
+    const dailyVotesRemaining = 10 - (dailyVotes + 1);
 
     const response: VoteResponse = {
       vote,
