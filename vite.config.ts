@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode } ) => ({
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -29,7 +29,7 @@ function expressPlugin(mode: string): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
-      if (mode === 'development') {
+      if (mode === "development") {
         // Lazy-load server dependencies only during dev serve, not during build
         const { createServer } = await import("./server/index.ts");
         const app = createServer();
