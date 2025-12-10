@@ -1,0 +1,153 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme for WatchEarn
+   * Modern gradient-based design with vibrant primary colors
+  */
+  :root {
+    /* Modern light theme */
+    --background: 0 0% 100%;
+    --foreground: 10 40% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 10 40% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 10 40% 3.9%;
+
+    /* Vibrant gradient primary colors (orange to purple) */
+    --primary: 268 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 280 65% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 16 92% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 268 85% 55%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 10 40% 3.9%;
+    --sidebar-primary: 268 85% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 16 92% 54%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 268 85% 55%;
+  }
+
+  .dark {
+    --background: 10 25% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 10 30% 15%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 10 30% 15%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 268 85% 65%;
+    --primary-foreground: 10 25% 10%;
+
+    --secondary: 280 65% 60%;
+    --secondary-foreground: 10 25% 10%;
+
+    --accent: 16 92% 60%;
+    --accent-foreground: 10 25% 10%;
+
+    --muted: 10 15% 30%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 10 20% 25%;
+    --input: 10 20% 25%;
+    --ring: 268 85% 65%;
+
+    --sidebar-background: 10 25% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 268 85% 65%;
+    --sidebar-primary-foreground: 10 25% 10%;
+    --sidebar-accent: 16 92% 60%;
+    --sidebar-accent-foreground: 10 25% 10%;
+    --sidebar-border: 10 20% 25%;
+    --sidebar-ring: 268 85% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  h4 {
+    @apply text-xl font-semibold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-red-600 text-white px-6 py-3 font-semibold hover:bg-red-700 transition-colors disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg bg-gray-700 text-white px-6 py-3 font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-lg border border-border bg-background text-foreground px-6 py-3 font-semibold hover:bg-muted transition-colors disabled:opacity-50;
+  }
+
+  .card-base {
+    @apply rounded-xl border border-border bg-card p-6 shadow-sm;
+  }
+}
