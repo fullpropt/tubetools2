@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode } ) => ({
   server: {
     host: "::",
     port: 8080,
@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist/spa",
   },
-  plugins: [react(), expressPlugin()],
+  plugins: [react(), expressPlugin(mode)],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
@@ -24,17 +24,19 @@ export default defineConfig(({ mode }) => ({
   },
 }));
 
-function expressPlugin(): Plugin {
+function expressPlugin(mode: string): Plugin {
   return {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     async configureServer(server) {
-      // Lazy-load server dependencies only during dev serve, not during build
-      const { createServer } = await import("./server");
-      const app = createServer();
-
-      // Add Express app as middleware to Vite dev server
-      server.middlewares.use(app);
+      if (mode === 'development') {
+        // Lazy-load server dependencies only during dev serve, not during build
+        const { createServer } = await import("./server/index.ts");
+        const app = createServer();
+  
+        // Add Express app as middleware to Vite dev server
+        server.middlewares.use(app);
+      }
     },
   };
 }
