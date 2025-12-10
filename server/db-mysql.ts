@@ -105,8 +105,10 @@ function convertPostgresToMysql(sql: string): string {
 
 export async function seedVideos() {
   const getVideoReward = () => {
-    const min = Math.round((Math.random() * (27.0 - 0.3) + 0.3) * 100) / 100;
-    const max = Math.round((min + Math.random() * (27.0 - min)) * 100) / 100;
+    const MIN_REWARD = 4.44;
+    const MAX_REWARD = 8.33;
+    const min = Math.round((Math.random() * (MAX_REWARD * 0.7 - MIN_REWARD) + MIN_REWARD) * 100) / 100;
+    const max = Math.round((Math.random() * (MAX_REWARD - min) + min) * 100) / 100;
     return { min, max };
   };
 
