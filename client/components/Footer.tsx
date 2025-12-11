@@ -1,95 +1,74 @@
-import { Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Play } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 mt-16">
+      <div className="container mx-auto px-4 py-16">
         {/* Grid de conteúdo */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Coluna 1: Sobre */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          {/* Coluna 1: Logo e Descrição */}
           <div>
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <div className="bg-red-600 rounded-lg p-2">
-                <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.615 3.175h-15.23c-1.697 0-3.076 1.379-3.076 3.075v10.5c0 1.696 1.379 3.075 3.076 3.075h15.23c1.697 0 3.076-1.379 3.076-3.075v-10.5c0-1.696-1.379-3.075-3.076-3.075zm-5.338 9.921t-4.171-2.441v4.882l4.171-2.441z" />
-                </svg>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="bg-red-600 rounded p-1.5 flex-shrink-0">
+                <Play className="h-5 w-5 text-white fill-white" />
               </div>
-              TubeTools
-            </h3>
+              <h3 className="text-white font-bold text-lg">TubeTools</h3>
+            </div>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Ganhe dinheiro assistindo e votando em vídeos. A plataforma que recompensa seu tempo.
+              Earn money by watching and voting on videos. The platform that rewards your time.
             </p>
           </div>
 
-          {/* Coluna 2: Links Úteis */}
+          {/* Coluna 2: Information */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Informações</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Sobre Nós
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Como Funciona
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Blog
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Coluna 3: Políticas */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Políticas</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Privacidade
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Termos de Serviço
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Política de Cookies
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Denúncias
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Coluna 4: Contato */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Contato</h4>
+            <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-wide">Information</h4>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-gray-400">
-                <Mail className="h-4 w-4 text-red-600" />
-                <a href="mailto:support@tubetools.com" className="hover:text-white transition-colors">
-                  support@tubetools.com
-                </a>
+              <li>
+                <Link to="/how-it-works" className="text-gray-400 hover:text-white transition-colors">
+                  How It Works
+                </Link>
               </li>
-              <li className="flex items-center gap-2 text-gray-400">
-                <Phone className="h-4 w-4 text-red-600" />
-                <span>+55 (11) 9999-9999</span>
+              <li>
+                <Link to="/faq" className="text-gray-400 hover:text-white transition-colors">
+                  FAQ
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Coluna 3: Policies */}
+          <div>
+            <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-wide">Policies</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link to="/terms-of-service" className="text-gray-400 hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Coluna 4: Account */}
+          <div>
+            <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-wide">Account</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link to="/profile" className="text-gray-400 hover:text-white transition-colors">
+                  Profile
+                </Link>
+              </li>
+              <li>
+                <Link to="/change-password" className="text-gray-400 hover:text-white transition-colors">
+                  Change Password
+                </Link>
               </li>
             </ul>
           </div>
@@ -100,21 +79,8 @@ export default function Footer() {
           {/* Rodapé inferior */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-500">
-              © {currentYear} TubeTools. Todos os direitos reservados.
+              © {currentYear} TubeTools. All rights reserved.
             </p>
-            <div className="flex gap-4 text-xs text-gray-500">
-              <a href="#" className="hover:text-gray-300 transition-colors">
-                Status
-              </a>
-              <span>•</span>
-              <a href="#" className="hover:text-gray-300 transition-colors">
-                Documentação
-              </a>
-              <span>•</span>
-              <a href="#" className="hover:text-gray-300 transition-colors">
-                Suporte
-              </a>
-            </div>
           </div>
         </div>
       </div>
