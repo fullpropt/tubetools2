@@ -30,48 +30,18 @@ export default function FAQ() {
     },
     {
       id: "3",
-      question: "How long does a withdrawal take?",
-      answer:
-        "After you complete the payment for the transaction fee, your withdrawal is typically processed within 24-48 hours. You will receive the funds directly to your bank account.",
-    },
-    {
-      id: "4",
-      question: "What is the transaction fee?",
-      answer:
-        "The transaction fee is a fixed amount that varies based on your withdrawal amount. It covers the cost of processing and transferring your earnings to your bank account.",
-    },
-    {
-      id: "5",
-      question: "Can I watch videos on mobile?",
-      answer:
-        "Yes! TubeTools is fully responsive and works on mobile devices. You can watch videos, vote, and manage your account from your smartphone or tablet.",
-    },
-    {
-      id: "6",
       question: "Do I need to watch videos in full?",
       answer:
         "While you can skip videos, watching them in full ensures you get the maximum reward. We recommend watching videos completely to maximize your earnings.",
     },
     {
-      id: "7",
+      id: "4",
       question: "Is my personal information safe?",
       answer:
         "Yes, we take security very seriously. All your personal and banking information is encrypted and stored securely. We never share your data with third parties.",
     },
     {
-      id: "8",
-      question: "Can I change my bank details?",
-      answer:
-        "Yes, you can update your bank details anytime from your profile settings. Just make sure to use the correct information to avoid withdrawal delays.",
-    },
-    {
-      id: "9",
-      question: "What if I have technical issues?",
-      answer:
-        "If you encounter any technical problems, please contact our support team. We're here to help and will resolve your issue as quickly as possible.",
-    },
-    {
-      id: "10",
+      id: "5",
       question: "Can I have multiple accounts?",
       answer:
         "No, each person is allowed only one account. Creating multiple accounts may result in account suspension and forfeiture of earnings.",
