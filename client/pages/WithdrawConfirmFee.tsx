@@ -50,7 +50,13 @@ export default function WithdrawConfirmFee() {
           return;
         }
 
-        // CORREÇÃO 3: Validar status do saque
+        // CORREÇÃO IMPORTANTE: Se o status for "completed", redirecionar para success
+        if (currentWithdrawal.status === "completed") {
+          navigate(`/withdraw/success/${withdrawalId}`);
+          return;
+        }
+
+        // CORREÇÃO 3: Validar status do saque - agora apenas rejeita se não for pending ou completed
         if (currentWithdrawal.status !== "pending") {
           setError(`This withdrawal cannot be processed. Current status: ${currentWithdrawal.status}`);
           setLoading(false);
