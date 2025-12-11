@@ -57,15 +57,23 @@ export default function WithdrawConfirmFee() {
           return;
         }
 
-        setWithdrawal(currentWithdrawal);
+        // CORREÇÃO CRÍTICA: Converter amount para número se for string
+        const withdrawalWithNumberAmount = {
+          ...currentWithdrawal,
+          amount: typeof currentWithdrawal.amount === "string" 
+            ? parseFloat(currentWithdrawal.amount) 
+            : currentWithdrawal.amount
+        };
+
+        setWithdrawal(withdrawalWithNumberAmount);
 
         // Buscar informações de saldo
         const userBalance = await apiGet<BalanceInfo>("/balance");
         setBalance(userBalance);
 
         // Calcular percentual de taxa
-        if (currentWithdrawal.amount > 0) {
-          const percentage = (feeAmount / currentWithdrawal.amount) * 100;
+        if (withdrawalWithNumberAmount.amount > 0) {
+          const percentage = (feeAmount / withdrawalWithNumberAmount.amount) * 100;
           setFeePercentage(percentage);
         }
 
