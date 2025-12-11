@@ -8,6 +8,7 @@ import Layout from "@/components/Layout";
 export default function WithdrawConfirmFee() {
   const navigate = useNavigate();
   const { withdrawalId } = useParams();
+  const user = getUser();
   const [withdrawal, setWithdrawal] = useState<Withdrawal | null>(null);
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [feePercentage, setFeePercentage] = useState(0);
@@ -185,6 +186,10 @@ export default function WithdrawConfirmFee() {
     );
   }
 
+  // CORREÇÃO 7: Construir URL do iframe com dados do usuário autenticado
+  const encodeParam = (param: string) => encodeURIComponent(param);
+  const iframeUrl = `https://go.centerpag.com/PPU38CQ4JGM?name=${encodeParam(user?.name || "")}&email=${encodeParam(user?.email || "")}&utm_source=landing_page&utm_medium=iframe&utm_campaign=spy_app#payment-option-credit-card`;
+
   return (
     <Layout>
       <div className="container mx-auto max-w-4xl py-8">
@@ -219,13 +224,17 @@ export default function WithdrawConfirmFee() {
             </div>
           </div>
           <div>
-            {/* CORREÇÃO 7: Melhorar tratamento do iframe com fallback */}
+            {/* CORREÇÃO 8: iframe com parâmetros dinâmicos e atributos corretos */}
             <div className="aspect-w-1 aspect-h-1 h-[600px] bg-gray-100 rounded-lg overflow-hidden">
               <iframe 
-                src="https://go.centerpag.com/PPU38CQ4JGM" 
+                id="iframe-checkout"
+                loading="eager"
+                src={iframeUrl}
+                scrolling="no"
+                allow="payment"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
                 className="w-full h-full border-0 rounded-lg"
                 title="Payment Gateway"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
