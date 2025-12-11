@@ -99,7 +99,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">10. Earnings and Withdrawals</h2>
               <p>
-                TubeTools provides a platform for users to earn money by watching videos and voting. All earnings are subject to our verification process. We reserve the right to suspend or cancel accounts that violate our terms or engage in fraudulent activity. Withdrawal requests are processed within 24-48 hours of payment confirmation.
+                TubeTools provides a platform for users to earn money by watching videos and voting. All earnings are subject to our verification process. We reserve the right to suspend or cancel accounts that violate our terms or engage in fraudulent activity. Withdrawal requests are processed within 7 business days of payment confirmation.
               </p>
             </section>
 
