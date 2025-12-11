@@ -11,6 +11,9 @@ import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
+import WithdrawBankDetails from "./pages/WithdrawBankDetails";
+import WithdrawConfirmFee from "./pages/WithdrawConfirmFee";
+import WithdrawSuccess from "./pages/WithdrawSuccess";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,15 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/withdraw/bank-details/:withdrawalId"
+            element={<WithdrawBankDetails />}
+          />
+          <Route
+            path="/withdraw/confirm-fee/:withdrawalId"
+            element={<WithdrawConfirmFee />}
+          />
+          <Route path="/withdraw/success/:withdrawalId" element={<WithdrawSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

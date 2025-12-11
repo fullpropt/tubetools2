@@ -34,9 +34,15 @@ export interface Transaction {
 export interface Withdrawal {
   id: string;
   amount: number;
-  status: "pending" | "completed" | "rejected";
+  status: "pending" | "completed" | "rejected" | "cancelled";
   requestedAt: string;
   completedAt?: string;
+  bankDetails?: {
+    holderName: string;
+    routingNumber: string;
+    accountNumber: string;
+    bankName: string;
+  };
 }
 
 export interface UserData {
@@ -310,6 +316,42 @@ export async function addWithdrawal(
     return await loadUserData(email);
   } catch (err) {
     console.error("Could not add withdrawal:", err);
+    return null;
+  }
+}
+
+export async function updateWithdrawal(
+  email: string,
+  withdrawal: Withdrawal,
+): Promise<UserData | null> {
+  try {
+    const userData = await loadUserData(email);
+    if (!userData) {
+      return null;
+    }
+
+    // Prepare bank details for storage (MySQL JSON support is limited, so we stringify)
+    const bankDetailsJson = withdrawal.bankDetails
+      ? JSON.stringify(withdrawal.bankDetails)
+      : null;
+
+    await executeQuery(
+      `UPDATE withdrawals 
+       SET amount = $1, status = $2, processed_at = $3, bank_details = $4
+       WHERE id = $5 AND user_id = $6`,
+      [
+        withdrawal.amount,
+        withdrawal.status,
+        withdrawal.completedAt,
+        bankDetailsJson,
+        withdrawal.id,
+        userData.profile.id,
+      ],
+    );
+
+    return await loadUserData(email);
+  } catch (err) {
+    console.error("Could not update withdrawal:", err);
     return null;
   }
 }

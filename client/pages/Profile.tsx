@@ -22,7 +22,7 @@ export default function Profile() {
   const [error, setError] = useState("");
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawMethod, setWithdrawMethod] = useState("paypal");
+  const [withdrawMethod, setWithdrawMethod] = useState("bank-transfer");
   const [withdrawing, setWithdrawing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -88,21 +88,15 @@ export default function Profile() {
         return;
       }
 
-      await apiPost("/api/withdrawals", {
-        amount,
-        method: withdrawMethod,
-      });
-
-      setSuccessMessage(
-        "Withdrawal request submitted! We'll review it and process it soon.",
+      const response = await apiPost<{ withdrawalId: string }>(
+        "/api/withdrawals",
+        {
+          amount,
+        },
       );
-      setWithdrawAmount("");
-      setShowWithdrawForm(false);
 
-      setTimeout(() => {
-        loadBalance();
-        loadTransactions();
-      }, 1000);
+      // Redireciona para a página de dados bancários
+      navigate(`/withdraw/bank-details/${response.withdrawalId}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to process withdrawal",
@@ -205,7 +199,7 @@ export default function Profile() {
                   className="w-full px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Send className="h-4 w-4" />
-                  <span>Request Withdrawal</span>
+                  <span>Start Withdrawal Process</span>
                 </button>
               ) : (
                 <form
@@ -234,55 +228,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold mb-2">
-                      Payout Method
-                    </label>
-                    <select
-                      value={withdrawMethod}
-                      onChange={(e) => setWithdrawMethod(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select a payment method...</option>
-                      <optgroup label="Wallets & Payment Services">
-                        <option value="paypal">PayPal</option>
-                        <option value="stripe">Stripe</option>
-                        <option value="skrill">Skrill</option>
-                        <option value="neteller">Neteller</option>
-                        <option value="wise">Wise (TransferWise)</option>
-                      </optgroup>
-                      <optgroup label="Bank & Wire Transfers">
-                        <option value="bank-transfer">Bank Transfer</option>
-                        <option value="ach">ACH Transfer (US)</option>
-                        <option value="sepa">SEPA Transfer (EU)</option>
-                        <option value="swift">SWIFT Wire</option>
-                      </optgroup>
-                      <optgroup label="Cryptocurrencies">
-                        <option value="bitcoin">Bitcoin (BTC)</option>
-                        <option value="ethereum">Ethereum (ETH)</option>
-                        <option value="usdc">USD Coin (USDC)</option>
-                        <option value="usdt">Tether (USDT)</option>
-                        <option value="monero">Monero (XMR)</option>
-                      </optgroup>
-                      <optgroup label="Mobile Payments">
-                        <option value="apple-pay">Apple Pay</option>
-                        <option value="google-pay">Google Pay</option>
-                        <option value="samsung-pay">Samsung Pay</option>
-                      </optgroup>
-                      <optgroup label="Regional Services">
-                        <option value="alipay">Alipay (China)</option>
-                        <option value="wechat">WeChat Pay (China)</option>
-                        <option value="brl">PIX (Brazil)</option>
-                        <option value="upi">UPI (India)</option>
-                        <option value="truemoney">TrueMoney (Thailand)</option>
-                      </optgroup>
-                      <optgroup label="Other Methods">
-                        <option value="amazon-gift">Amazon Gift Card</option>
-                        <option value="prepaid-card">Prepaid Card</option>
-                        <option value="check">Check by Mail</option>
-                      </optgroup>
-                    </select>
-                  </div>
+                  {/* Payout Method is now fixed to Bank Transfer for this flow */}
 
                   <p className="text-xs text-muted-foreground">
                     Withdrawals are processed after manual review.
