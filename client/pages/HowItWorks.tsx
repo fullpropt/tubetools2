@@ -36,7 +36,7 @@ export default function HowItWorks() {
               <h2 className="text-2xl font-bold">1. Watch Videos</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Browse through our curated collection of videos. Click on any video that interests you and start watching. The longer you watch, the more you earn!
+              Browse through our curated collection of videos. Click on any video that interests you and start watching. The more videos you watch, the more you earn!
             </p>
           </div>
 
@@ -49,7 +49,7 @@ export default function HowItWorks() {
               <h2 className="text-2xl font-bold">2. Vote & Earn</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              After watching, vote on the video. Your vote counts and helps us understand what content you like. Each vote earns you rewards!
+              After watching the video, vote on it to register your earnings.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export default function HowItWorks() {
               <h2 className="text-2xl font-bold">3. Accumulate Balance</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Your earnings accumulate in your balance. Check your profile anytime to see how much you've earned. No minimum watch time required!
+              Your earnings accumulate in your balance, which you can track by accessing the 'Balance' tab in the upper left.
             </p>
           </div>
 
@@ -75,30 +75,34 @@ export default function HowItWorks() {
               <h2 className="text-2xl font-bold">4. Withdraw Earnings</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Once you have enough balance, request a withdrawal. Add your bank details and pay the transaction fee to receive your earnings!
+              After 20 days of continuous access, your balance will become available for withdrawal. You can submit your withdrawal request in the 'Balance' section by providing your bank details for the transfer.
             </p>
           </div>
         </div>
 
         {/* FAQ Section */}
         <div className="bg-gray-50 rounded-lg p-8 mb-12">
-          <h2 className="text-2xl font-bold mb-6">Quick Tips</h2>
+          <h2 className="text-2xl font-bold mb-6">Relevant Information</h2>
           <ul className="space-y-4 text-gray-700">
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Watch videos in full to maximize your earnings</span>
+              <span>Watch the videos until the end to enable the voting option.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Vote honestly to help us improve our content recommendations</span>
+              <span>Your “like” or “dislike” vote does not affect your earnings, but it helps advertisers measure the performance of their ads.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Check your balance regularly to track your progress</span>
+              <span>You are allowed to vote on only 10 videos per day.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Withdrawals are processed within 24-48 hours</span>
+              <span>Your balance will expire if you do not watch at least one ad per day.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-red-600 font-bold">•</span>
+              <span>Withdrawals are only allowed starting from $150. After making a withdrawal, you can request another one only after completing another 20 consecutive days.</span>
             </li>
           </ul>
         </div>
