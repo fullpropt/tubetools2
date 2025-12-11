@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAuthenticated, getUser } from "@/lib/auth";
+import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { BalanceInfo, Transaction, Withdrawal } from "@shared/api";
 import Layout from "@/components/Layout";
+import EditNameModal from "@/components/EditNameModal";
 import {
   Wallet,
   TrendingUp,
@@ -26,6 +27,7 @@ export default function Profile() {
   const [withdrawing, setWithdrawing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+  const [userName, setUserName] = useState(getUser()?.name || "");
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -103,6 +105,15 @@ export default function Profile() {
       );
     } finally {
       setWithdrawing(false);
+    }
+  };
+
+  const handleNameUpdated = (newName: string) => {
+    setUserName(newName);
+    // Update user in localStorage
+    const user = getUser();
+    if (user) {
+      setUser({ ...user, name: newName });
     }
   };
 
@@ -343,7 +354,10 @@ export default function Profile() {
                 <p className="text-xs font-semibold text-muted-foreground mb-1">
                   NAME
                 </p>
-                <p className="font-semibold">{user?.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold">{userName}</p>
+                  <EditNameModal currentName={userName} onNameUpdated={handleNameUpdated} />
+                </div>
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1">
