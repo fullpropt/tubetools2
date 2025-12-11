@@ -20,7 +20,7 @@ export default function WithdrawSuccess() {
 
     const fetchWithdrawal = async () => {
       try {
-        const withdrawals = await apiGet<Withdrawal[]>("/api/withdrawals");
+        const withdrawals = await apiGet<Withdrawal[]>("/withdrawals");
         const currentWithdrawal = withdrawals.find(w => w.id === withdrawalId);
         if (currentWithdrawal) {
           setWithdrawal(currentWithdrawal);

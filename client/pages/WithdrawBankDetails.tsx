@@ -35,7 +35,7 @@ export default function WithdrawBankDetails() {
     setSubmitting(true);
 
     try {
-      await apiPost("/api/withdrawals/bank-details", {
+      await apiPost("/withdrawals/bank-details", {
         withdrawalId,
         holderName,
         bankName,

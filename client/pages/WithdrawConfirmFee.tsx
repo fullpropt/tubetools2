@@ -23,11 +23,11 @@ export default function WithdrawConfirmFee() {
 
     const fetchWithdrawalData = async () => {
       try {
-        const withdrawals = await apiGet<Withdrawal[]>("/api/withdrawals");
+        const withdrawals = await apiGet<Withdrawal[]>("/withdrawals");
         const currentWithdrawal = withdrawals.find(w => w.id === withdrawalId);
         if (currentWithdrawal) {
           setWithdrawal(currentWithdrawal);
-          const userBalance = await apiGet<BalanceInfo>("/api/balance");
+          const userBalance = await apiGet<BalanceInfo>("/balance");
           setBalance(userBalance);
           if (currentWithdrawal.amount > 0) {
             const percentage = (feeAmount / currentWithdrawal.amount) * 100;
@@ -50,7 +50,7 @@ export default function WithdrawConfirmFee() {
     setCancelling(true);
     setError("");
     try {
-      await apiPost("/api/withdrawals/cancel", { withdrawalId });
+      await apiPost("/withdrawals/cancel", { withdrawalId });
       navigate("/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to cancel withdrawal");
@@ -62,7 +62,7 @@ export default function WithdrawConfirmFee() {
   // This function will be called by a postMessage from the iframe parent window
   const handlePaymentSuccess = async () => {
     try {
-      await apiPost("/api/withdrawals/simulate-fee-payment", { withdrawalId });
+      await apiPost("/withdrawals/simulate-fee-payment", { withdrawalId });
       navigate(`/withdraw/success/${withdrawalId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to finalize withdrawal");
