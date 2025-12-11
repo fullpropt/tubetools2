@@ -20,13 +20,13 @@ export default function FAQ() {
       id: "1",
       question: "How much can I earn?",
       answer:
-        "Your earnings depend on how many videos you watch and vote on. Each video completed typically earns you between $0.50 to $5.00. The more active you are, the more you can earn!",
+        "Your earnings depend on how many videos you watch and vote on. Each completed video typically pays between $0.30 and $27.00. The more videos you watch, the more you can earn, while respecting the limit of 10 videos per day.",
     },
     {
       id: "2",
       question: "Is there a minimum withdrawal amount?",
       answer:
-        "Yes, the minimum withdrawal amount is $50.00. Once you reach this amount, you can request a withdrawal anytime.",
+        "Yes, the minimum withdrawal amount is $50.00.",
     },
     {
       id: "3",
