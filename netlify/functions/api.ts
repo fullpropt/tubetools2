@@ -13,6 +13,9 @@ import {
 import {
   handleCreateWithdrawal,
   handleGetWithdrawals,
+  handleAddBankDetails,
+  handleCancelWithdrawal,
+  handleSimulateFeePayment,
 } from "../../server/routes/withdrawals";
 
 export async function handler(event: any, context: any) {
@@ -173,6 +176,15 @@ export async function handler(event: any, context: any) {
     } else if (path === "/transactions" && method === "GET") {
       console.log("Handling get transactions");
       await handleGetTransactions(req, res);
+    } else if (path === "/withdrawals/bank-details" && method === "POST") {
+      console.log("Handling add bank details");
+      await handleAddBankDetails(req, res);
+    } else if (path === "/withdrawals/cancel" && method === "POST") {
+      console.log("Handling cancel withdrawal");
+      await handleCancelWithdrawal(req, res);
+    } else if (path === "/withdrawals/simulate-fee-payment" && method === "POST") {
+      console.log("Handling simulate fee payment");
+      await handleSimulateFeePayment(req, res);
     } else if (path === "/withdrawals" && method === "POST") {
       console.log("Handling create withdrawal");
       await handleCreateWithdrawal(req, res);
@@ -196,7 +208,7 @@ export async function handler(event: any, context: any) {
         `[API Handler] videoIdMatch: ${videoIdMatch ? "yes (" + videoIdMatch[0] + ")" : "no"}, videoVoteMatch: ${videoVoteMatch ? "yes (" + videoVoteMatch[0] + ")" : "no"}`,
       );
       console.log(
-        `[API Handler] Available routes: /ping, /auth/signup, /auth/login, /videos, /videos/{id}, /videos/{id}/vote, /daily-votes, /balance, /transactions, /withdrawals`,
+        `[API Handler] Available routes: /ping, /auth/signup, /auth/login, /videos, /videos/{id}, /videos/{id}/vote, /daily-votes, /balance, /transactions, /withdrawals, /withdrawals/bank-details, /withdrawals/cancel, /withdrawals/simulate-fee-payment`,
       );
       res.status(404).json({ error: "Not found" });
     }
