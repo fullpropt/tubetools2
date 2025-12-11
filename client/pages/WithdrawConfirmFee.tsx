@@ -200,52 +200,70 @@ export default function WithdrawConfirmFee() {
 
   return (
     <Layout>
-      <div className="container mx-auto max-w-4xl py-8">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
+      <div className="container mx-auto max-w-6xl py-8 px-4">
+        {/* CORREÇÃO 8: Layout ajustado para melhor responsividade */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Coluna esquerda - Detalhes do saque */}
+          <div className="lg:col-span-1">
             <h1 className="text-3xl font-bold mb-4">Confirm Withdrawal Fee</h1>
             <p className="text-muted-foreground mb-6">
               To complete the withdrawal securely and in accordance with our operational policies, it is necessary to pay the {feePercentage.toFixed(2)}% transaction fee.
             </p>
-            <div className="border rounded-lg p-4 space-y-2">
+            
+            {/* CORREÇÃO IMPORTANTE: Exibição corrigida da taxa */}
+            <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
               <div className="flex justify-between">
-                <span>Withdrawal Amount:</span>
+                <span className="text-gray-600">Withdrawal Amount:</span>
                 <span className="font-semibold">${withdrawal.amount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Transaction Fee:</span>
-                <span className="font-semibold">${feeAmount.toFixed(2)}</span>
+              
+              <div className="border-t pt-3">
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Transaction Fee:</span>
+                  <span className="font-semibold text-red-600">${feeAmount.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  ({feePercentage.toFixed(2)}% of withdrawal amount)
+                </p>
               </div>
-              <div className="border-t pt-2 flex justify-between font-bold">
-                <span>Total Amount:</span>
-                <span>${(withdrawal.amount + feeAmount).toFixed(2)}</span>
+              
+              <div className="border-t pt-3 bg-blue-50 -mx-4 -mb-4 px-4 py-3 rounded-b-lg">
+                <p className="text-sm font-semibold text-blue-900 mb-2">Amount to Pay:</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-blue-900">Transaction Fee Only</span>
+                  <span className="text-2xl font-bold text-blue-600">${feeAmount.toFixed(2)}</span>
+                </div>
               </div>
             </div>
+            
             <div className="text-center mt-6">
               <button 
                 onClick={handleCancel} 
                 disabled={cancelling} 
-                className="text-sm text-gray-500 hover:underline disabled:text-gray-300"
+                className="text-sm text-gray-500 hover:underline disabled:text-gray-300 transition-colors"
               >
                 {cancelling ? "Cancelling..." : "Cancel Withdrawal"}
               </button>
             </div>
           </div>
-          <div>
-            {/* CORREÇÃO 8: iframe com parâmetros dinâmicos e atributos corretos */}
-            <div className="aspect-w-1 aspect-h-1 h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+
+          {/* Coluna direita - iframe de pagamento */}
+          <div className="lg:col-span-2">
+            {/* CORREÇÃO 9: iframe com altura dinâmica e sem cortes */}
+            <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <iframe 
                 id="iframe-checkout"
                 loading="eager"
                 src={iframeUrl}
-                scrolling="no"
+                scrolling="auto"
                 allow="payment"
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
-                className="w-full h-full border-0 rounded-lg"
+                className="w-full"
+                style={{ minHeight: "800px", height: "auto" }}
                 title="Payment Gateway"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-3 text-center">
               Secure payment processing by CenterPag
             </p>
           </div>
