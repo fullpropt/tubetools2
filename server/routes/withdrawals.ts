@@ -33,8 +33,8 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
 
     const { amount } = req.body;
 
-    if (!amount || !method) {
-      res.status(400).json({ error: "Amount and method are required" });
+    if (!amount) {
+      res.status(400).json({ error: "Amount is required" });
       return;
     }
 
