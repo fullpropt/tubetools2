@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, clearAuth } from "@/lib/auth";
 import { LogOut, Play, Wallet } from "lucide-react";
+import Footer from "@/components/Footer";
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,7 +19,7 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header/Navigation */}
       {!hideNav && user && (
         <>
@@ -93,8 +94,11 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
         </>
       )}
 
-      {/* Main Content - Add padding for mobile nav */}
+      {/* Main Content - Flex grow para empurrar footer para baixo */}
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
