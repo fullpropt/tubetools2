@@ -6,10 +6,18 @@ import { Withdrawal } from "@shared/api";
 import Layout from "@/components/Layout";
 import { CheckCircle2, DollarSign, Building2, User, CreditCard } from "lucide-react";
 
+interface BankDetails {
+  holderName?: string;
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+}
+
 export default function WithdrawSuccess() {
   const navigate = useNavigate();
   const { withdrawalId } = useParams();
   const [withdrawal, setWithdrawal] = useState<Withdrawal | null>(null);
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -24,6 +32,23 @@ export default function WithdrawSuccess() {
         const currentWithdrawal = withdrawals.find(w => w.id === withdrawalId);
         if (currentWithdrawal) {
           setWithdrawal(currentWithdrawal);
+          
+          // Parse bank_details - pode vir como string ou objeto
+          let parsedBankDetails: BankDetails | null = null;
+          
+          if (currentWithdrawal.bankDetails) {
+            if (typeof currentWithdrawal.bankDetails === "string") {
+              try {
+                parsedBankDetails = JSON.parse(currentWithdrawal.bankDetails);
+              } catch (e) {
+                console.error("Failed to parse bank details:", e);
+              }
+            } else {
+              parsedBankDetails = currentWithdrawal.bankDetails as BankDetails;
+            }
+          }
+          
+          setBankDetails(parsedBankDetails);
         } else {
           setError("Withdrawal not found.");
         }
@@ -83,7 +108,7 @@ export default function WithdrawSuccess() {
         </div>
 
         {/* Bank Details Card */}
-        {withdrawal.bankDetails && (
+        {bankDetails && (
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900 mb-6">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -92,56 +117,64 @@ export default function WithdrawSuccess() {
 
             <div className="space-y-4">
               {/* Account Holder */}
-              <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <User className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Account Holder
-                  </p>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {withdrawal.bankDetails.holderName}
-                  </p>
+              {bankDetails.holderName && (
+                <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <User className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                      Account Holder
+                    </p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {bankDetails.holderName}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Bank Name */}
-              <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <Building2 className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Bank Name
-                  </p>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {withdrawal.bankDetails.bankName}
-                  </p>
+              {bankDetails.bankName && (
+                <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <Building2 className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                      Bank Name
+                    </p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {bankDetails.bankName}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Account Number */}
-              <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <CreditCard className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Account Number
-                  </p>
-                  <p className="font-semibold text-gray-900 dark:text-white font-mono">
-                    **** **** **** {withdrawal.bankDetails.accountNumber.slice(-4)}
-                  </p>
+              {bankDetails.accountNumber && (
+                <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <CreditCard className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                      Account Number
+                    </p>
+                    <p className="font-semibold text-gray-900 dark:text-white font-mono">
+                      **** **** **** {bankDetails.accountNumber.slice(-4)}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Routing Number */}
-              <div className="flex items-start gap-4">
-                <CreditCard className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Routing Number
-                  </p>
-                  <p className="font-semibold text-gray-900 dark:text-white font-mono">
-                    {withdrawal.bankDetails.routingNumber}
-                  </p>
+              {bankDetails.routingNumber && (
+                <div className="flex items-start gap-4">
+                  <CreditCard className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                      Routing Number
+                    </p>
+                    <p className="font-semibold text-gray-900 dark:text-white font-mono">
+                      {bankDetails.routingNumber}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
