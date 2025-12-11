@@ -39,6 +39,11 @@ const App = () => (
           <Route path="/withdraw/success/:withdrawalId" element={<WithdrawSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
