@@ -13,6 +13,9 @@ import { handleGetBalance, handleGetTransactions } from "./routes/balance";
 import {
   handleCreateWithdrawal,
   handleGetWithdrawals,
+  handleCancelWithdrawal,
+  handleSimulateFeePayment,
+  handleAddBankDetails,
 } from "./routes/withdrawals";
 import { seedVideos } from "./db-mysql";
 
@@ -58,6 +61,9 @@ export function createServer() {
   // Withdrawal routes
   app.post(["/withdrawals", "/api/withdrawals"], handleCreateWithdrawal);
   app.get(["/withdrawals", "/api/withdrawals"], handleGetWithdrawals);
+  app.post(["/withdrawals/bank-details", "/api/withdrawals/bank-details"], handleAddBankDetails);
+  app.post(["/withdrawals/cancel", "/api/withdrawals/cancel"], handleCancelWithdrawal);
+  app.post(["/withdrawals/simulate-fee-payment", "/api/withdrawals/simulate-fee-payment"], handleSimulateFeePayment);
 
   return app;
 }

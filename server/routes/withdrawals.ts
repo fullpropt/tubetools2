@@ -6,6 +6,7 @@ import {
   addWithdrawal,
   addTransaction,
   generateId,
+  updateWithdrawal,
 } from "../user-db";
 
 function getEmailFromToken(token: string | undefined): string | null {
