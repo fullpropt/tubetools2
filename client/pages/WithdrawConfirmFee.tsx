@@ -12,6 +12,7 @@ export default function WithdrawConfirmFee() {
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [feePercentage, setFeePercentage] = useState(0);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const feeAmount = 105.33;
 
@@ -21,29 +22,77 @@ export default function WithdrawConfirmFee() {
       return;
     }
 
+    // CORREÇÃO 1: Validar withdrawalId antes de fazer requisições
+    if (!withdrawalId) {
+      setError("Invalid withdrawal request. Please start over.");
+      setLoading(false);
+      return;
+    }
+
     const fetchWithdrawalData = async () => {
       try {
+        setLoading(true);
+        setError("");
+
+        // CORREÇÃO 2: Adicionar timeout para requisições
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+
         const withdrawals = await apiGet<Withdrawal[]>("/withdrawals");
+        clearTimeout(timeoutId);
+
         const currentWithdrawal = withdrawals.find(w => w.id === withdrawalId);
-        if (currentWithdrawal) {
-          setWithdrawal(currentWithdrawal);
-          const userBalance = await apiGet<BalanceInfo>("/balance");
-          setBalance(userBalance);
-          if (currentWithdrawal.amount > 0) {
-            const percentage = (feeAmount / currentWithdrawal.amount) * 100;
-            setFeePercentage(percentage);
-          }
-        } else {
-          setError("Withdrawal not found.");
+        
+        if (!currentWithdrawal) {
+          setError("Withdrawal not found. Please check your request and try again.");
+          setLoading(false);
+          return;
         }
+
+        // CORREÇÃO 3: Validar status do saque
+        if (currentWithdrawal.status !== "pending") {
+          setError(`This withdrawal cannot be processed. Current status: ${currentWithdrawal.status}`);
+          setLoading(false);
+          return;
+        }
+
+        setWithdrawal(currentWithdrawal);
+
+        // Buscar informações de saldo
+        const userBalance = await apiGet<BalanceInfo>("/balance");
+        setBalance(userBalance);
+
+        // Calcular percentual de taxa
+        if (currentWithdrawal.amount > 0) {
+          const percentage = (feeAmount / currentWithdrawal.amount) * 100;
+          setFeePercentage(percentage);
+        }
+
+        setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch withdrawal data");
+        // CORREÇÃO 4: Melhorar mensagens de erro
+        let errorMessage = "Failed to fetch withdrawal data";
+        
+        if (err instanceof Error) {
+          if (err.message.includes("abort")) {
+            errorMessage = "Request timeout. Please check your connection and try again.";
+          } else if (err.message.includes("Unauthorized")) {
+            errorMessage = "Your session has expired. Please log in again.";
+            navigate("/");
+            return;
+          } else if (err.message.includes("404")) {
+            errorMessage = "Withdrawal not found. Please start over.";
+          } else {
+            errorMessage = err.message;
+          }
+        }
+        
+        setError(errorMessage);
+        setLoading(false);
       }
     };
 
-    if (withdrawalId) {
-      fetchWithdrawalData();
-    }
+    fetchWithdrawalData();
   }, [navigate, withdrawalId]);
 
   const handleCancel = async () => {
@@ -54,7 +103,6 @@ export default function WithdrawConfirmFee() {
       navigate("/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to cancel withdrawal");
-    } finally {
       setCancelling(false);
     }
   };
@@ -81,12 +129,60 @@ export default function WithdrawConfirmFee() {
     return () => window.removeEventListener("message", handleIframeMessage);
   }, [withdrawalId]);
 
+  // CORREÇÃO 5: Melhorar exibição de erros com interface mais clara
   if (error) {
-    return <Layout><div className="text-red-500 text-center p-8">{error}</div></Layout>;
+    return (
+      <Layout>
+        <div className="container mx-auto max-w-2xl py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-red-800 mb-2">Error Processing Withdrawal</h2>
+            <p className="text-red-700 mb-4">{error}</p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => navigate("/profile")}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+              >
+                Return to Profile
+              </button>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // CORREÇÃO 6: Melhorar interface de carregamento
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto max-w-2xl py-8">
+          <div className="text-center">
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+            <p className="text-gray-600 mt-4">Loading withdrawal details...</p>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   if (!withdrawal || !balance) {
-    return <Layout><div className="text-center p-8">Loading...</div></Layout>;
+    return (
+      <Layout>
+        <div className="container mx-auto max-w-2xl py-8">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <p className="text-yellow-800">No withdrawal data available.</p>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (
@@ -107,17 +203,34 @@ export default function WithdrawConfirmFee() {
                 <span>Transaction Fee:</span>
                 <span className="font-semibold">${feeAmount.toFixed(2)}</span>
               </div>
+              <div className="border-t pt-2 flex justify-between font-bold">
+                <span>Total Amount:</span>
+                <span>${(withdrawal.amount + feeAmount).toFixed(2)}</span>
+              </div>
             </div>
             <div className="text-center mt-6">
-              <button onClick={handleCancel} disabled={cancelling} className="text-sm text-gray-500 hover:underline">
+              <button 
+                onClick={handleCancel} 
+                disabled={cancelling} 
+                className="text-sm text-gray-500 hover:underline disabled:text-gray-300"
+              >
                 {cancelling ? "Cancelling..." : "Cancel Withdrawal"}
               </button>
             </div>
           </div>
           <div>
-            <div className="aspect-w-1 aspect-h-1 h-[600px]">
-              <iframe src="https://go.centerpag.com/PPU38CQ4JGM" className="w-full h-full border-0 rounded-lg" />
+            {/* CORREÇÃO 7: Melhorar tratamento do iframe com fallback */}
+            <div className="aspect-w-1 aspect-h-1 h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+              <iframe 
+                src="https://go.centerpag.com/PPU38CQ4JGM" 
+                className="w-full h-full border-0 rounded-lg"
+                title="Payment Gateway"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+              />
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Secure payment processing by CenterPag
+            </p>
           </div>
         </div>
       </div>

@@ -65,15 +65,25 @@ export interface Transaction {
   createdAt: string;
 }
 
-// Withdrawals
+// Bank Details for Withdrawals
+export interface BankDetails {
+  holderName: string;
+  routingNumber: string;
+  accountNumber: string;
+  bankName: string;
+}
+
+// Withdrawals - CORRIGIDO COM TODOS OS CAMPOS NECESSÁRIOS
 export interface Withdrawal {
   id: string;
-  userId: string;
+  userId?: string;
   amount: number;
-  method: string;
-  status: "pending" | "approved" | "rejected" | "completed";
+  method?: string;
+  status: "pending" | "approved" | "rejected" | "completed" | "cancelled";
   requestedAt: string;
-  processedAt: string | null;
+  processedAt?: string | null;
+  completedAt?: string;
+  bankDetails?: BankDetails;
 }
 
 // Balance info
