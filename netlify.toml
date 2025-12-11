@@ -14,6 +14,24 @@
   to = "/.netlify/functions/api/:splat"
 
 [[redirects]]
+  force = true
+  from = "/withdrawals/*"
+  status = 200
+  to = "/.netlify/functions/api/withdrawals/:splat"
+
+[[redirects]]
+  force = true
+  from = "/balance"
+  status = 200
+  to = "/.netlify/functions/api/balance"
+
+[[redirects]]
+  force = true
+  from = "/transactions"
+  status = 200
+  to = "/.netlify/functions/api/transactions"
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
