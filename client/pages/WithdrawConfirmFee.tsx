@@ -50,10 +50,17 @@ export default function WithdrawConfirmFee() {
           return;
         }
 
-        // CORREÇÃO IMPORTANTE: Se o status for "completed", redirecionar para success
+        // CORREÇÃO IMPORTANTE: Se o status for "completed", chamar simulate-fee-payment e redirecionar
         if (currentWithdrawal.status === "completed") {
-          navigate(`/withdraw/success/${withdrawalId}`);
-          return;
+          try {
+            await apiPost("/withdrawals/simulate-fee-payment", { withdrawalId });
+            navigate(`/withdraw/success/${withdrawalId}`);
+            return;
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to process completed withdrawal");
+            setLoading(false);
+            return;
+          }
         }
 
         // CORREÇÃO 3: Validar status do saque - agora apenas rejeita se não for pending ou completed
