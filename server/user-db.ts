@@ -83,10 +83,27 @@ export async function loadUserData(email: string): Promise<UserData | null> {
     );
 
     const withdrawals = await executeQuery(
-      `SELECT id, amount, status, requested_at as "requestedAt", processed_at as "completedAt"
+      `SELECT id, amount, status, requested_at as "requestedAt", processed_at as "completedAt", bank_details
        FROM withdrawals WHERE user_id = $1 ORDER BY requested_at DESC`,
       [user.id],
     );
+
+    // Process bank_details JSON for each withdrawal
+    const processedWithdrawals = withdrawals.rows.map((w: any) => {
+      if (w.bank_details && typeof w.bank_details === 'string') {
+        try {
+          w.bankDetails = JSON.parse(w.bank_details);
+        } catch (e) {
+          console.error('Failed to parse bank_details:', e);
+          w.bankDetails = null;
+        }
+      } else if (w.bank_details && typeof w.bank_details === 'object') {
+        w.bankDetails = w.bank_details;
+      } else {
+        w.bankDetails = null;
+      }
+      return w;
+    });
 
     const today = new Date().toISOString().split("T")[0];
     const votesToday = votes.rows.filter((v: any) => {
@@ -114,7 +131,7 @@ export async function loadUserData(email: string): Promise<UserData | null> {
       profile,
       votes: votes.rows,
       transactions: transactions.rows,
-      withdrawals: withdrawals.rows,
+      withdrawals: processedWithdrawals,
       dailyVoteCount: { count: votesToday, date: today },
     };
   } catch (err) {
