@@ -163,6 +163,8 @@ export async function saveUserData(
         normalizedEmail,
       ],
     );
+    
+    console.log(`[saveUserData] Updated balance for ${normalizedEmail}: ${userData.profile.balance}`);
 
     return true;
   } catch (err) {
@@ -293,11 +295,14 @@ export async function addTransaction(
 
     if (transaction.type === "credit") {
       userData.profile.balance += transaction.amount;
+      console.log(`[addTransaction] Credit: ${transaction.amount}, New balance: ${userData.profile.balance}`);
     } else if (transaction.type === "debit") {
+      const oldBalance = userData.profile.balance;
       userData.profile.balance = Math.max(
         0,
         userData.profile.balance - transaction.amount,
       );
+      console.log(`[addTransaction] Debit: ${transaction.amount}, Old balance: ${oldBalance}, New balance: ${userData.profile.balance}`);
     }
 
     await saveUserData(email, userData);

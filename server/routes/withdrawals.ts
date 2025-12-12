@@ -275,9 +275,10 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
       return;
     }
 
-    // 1. Zerar o saldo do usuário
+    // 1. Verificar saldo atual
     const user = userData.profile;
     const amountToWithdraw = withdrawal.amount;
+    console.log(`[handleSimulateFeePayment] Saldo antes: ${user.balance}, Valor do saque: ${amountToWithdraw}`);
 
     // 2. Criar transação de débito (saque)
     const transactionId = generateId();
@@ -291,6 +292,10 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
     };
 
     await addTransaction(email, transaction);
+    
+    // Verificar saldo após a transação
+    const updatedUserData = await getUserByEmail(email);
+    console.log(`[handleSimulateFeePayment] Saldo após transação: ${updatedUserData?.profile.balance}`);
 
     // 3. Atualizar status do saque para completed
     withdrawal.status = "completed";
