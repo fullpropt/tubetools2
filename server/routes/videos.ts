@@ -61,6 +61,8 @@ export const handleGetVideos: RequestHandler = async (req, res) => {
     
     const videos = videosQuery.rows.map((video: any) => ({
       ...video,
+      rewardMin: parseFloat(video.rewardMin) || 0,
+      rewardMax: parseFloat(video.rewardMax) || 0,
       duration: video.duration || 180,
     }));
     
