@@ -236,6 +236,8 @@ export const handleVote: RequestHandler = async (req, res) => {
       [id]
     );
     
+    console.log(`[Video Vote] Video ID: ${id}, Query result:`, videoRewardQuery.rows);
+    
     if (videoRewardQuery.rows.length === 0) {
       res.status(404).json({ error: "Video not found" });
       return;
@@ -245,9 +247,13 @@ export const handleVote: RequestHandler = async (req, res) => {
     const rewardMin = parseFloat(videoRewardData.reward_min);
     const rewardMax = parseFloat(videoRewardData.reward_max);
     
+    console.log(`[Video Vote] Reward range: ${rewardMin} - ${rewardMax}`);
+    
     const reward = roundToTwoDecimals(
       Math.random() * (rewardMax - rewardMin) + rewardMin
     );
+    
+    console.log(`[Video Vote] Generated reward: ${reward}`);
 
     // Create vote record
     const voteId = generateId();
