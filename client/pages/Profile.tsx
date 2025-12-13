@@ -142,7 +142,6 @@ export default function Profile() {
     );
   }
 
-  const user = getUser();
   const votingDaysCount = balance.user.votingDaysCount || 0;
   const progressPercent = (votingDaysCount / 20) * 100;
 
