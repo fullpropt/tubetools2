@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { getDB } from "../db";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
+import { executeQuery } from "../db-mysql";
 import {
   getUserByEmail,
   updateUserProfile,
@@ -230,8 +231,7 @@ export const handleVote: RequestHandler = async (req, res) => {
     }
 
     // Generate random reward based on video's reward_min and reward_max
-    const dbConnection = getDB();
-    const videoRewardQuery = await dbConnection.query(
+    const videoRewardQuery = await executeQuery(
       'SELECT reward_min, reward_max FROM videos WHERE id = $1',
       [id]
     );
