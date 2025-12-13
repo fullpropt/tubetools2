@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { isAuthenticated, getUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { Video, VoteResponse } from "@shared/api";
@@ -34,6 +34,7 @@ interface EnhancedVideo extends Video {
 
 export default function Feed() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = getUser();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [allVideos, setAllVideos] = useState<Video[]>([]);
@@ -138,6 +139,11 @@ export default function Feed() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+
+  // Refresh when location changes (navigation back to this page)
+  useEffect(() => {
+    loadUserStats();
+  }, [location.key]);
 
   const loadUserStats = async () => {
     try {
