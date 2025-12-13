@@ -56,7 +56,7 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
               {/* User Info & Logout */}
               <div className="flex items-center gap-3 ml-auto">
                 <div className="hidden sm:block text-right">
-                  <p className="text-sm font-semibold">{user?.name || 'User'}</p>
+                  <p className="text-sm font-semibold">{user?.userName || 'User'}</p>
                   <p className="text-xs text-muted-foreground">
                     ${(user.balance || 0).toFixed(2)}
                   </p>
