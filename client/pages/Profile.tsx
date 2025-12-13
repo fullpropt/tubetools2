@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { BalanceInfo, Transaction, Withdrawal } from "@shared/api";
+import { BalanceInfo } from "@shared/api";
 import Layout from "@/components/Layout";
-import EditNameModal from "@/components/EditNameModal";
 import {
   Wallet,
   TrendingUp,
-  Calendar,
-  Send,
   CheckCircle2,
   AlertCircle,
   Clock,
@@ -17,6 +14,7 @@ import {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const user = getUser();
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,7 +160,7 @@ export default function Profile() {
                     YOUR BALANCE
                   </p>
                   <h2 className="text-5xl font-bold">
-                    ${(balance.user?.balance || 0).toFixed(2)}
+                    ${(user?.balance || 0).toFixed(2)}
                   </h2>
                 </div>
                 <Wallet className="h-8 w-8 opacity-80" />
@@ -387,7 +385,7 @@ export default function Profile() {
                     EARNINGS
                   </p>
                   <p className="font-bold">
-                    ${((balance.user?.balance || 0) - 213.19).toFixed(2)}
+                    ${((user?.balance || 0) - 213.19).toFixed(2)}
                   </p>
                 </div>
               </div>

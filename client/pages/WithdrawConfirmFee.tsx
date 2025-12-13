@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { isAuthenticated, getUser } from "@/lib/auth";
+import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { Withdrawal, BalanceInfo } from "@shared/api";
 import Layout from "@/components/Layout";
@@ -16,6 +16,25 @@ export default function WithdrawConfirmFee() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const feeAmount = 105.33;
+
+  // Função para atualizar os dados do usuário após o saque
+  const updateUserBalance = async () => {
+    try {
+      const userData = await apiGet("/balance");
+      if (userData && userData.user) {
+        const currentUser = getUser();
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            balance: userData.user.balance
+          };
+          setUser(updatedUser);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update user balance:", error);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -54,6 +73,8 @@ export default function WithdrawConfirmFee() {
         if (currentWithdrawal.status === "completed") {
           try {
             await apiPost("/withdrawals/simulate-fee-payment", { withdrawalId });
+            // Atualizar saldo do usuário no localStorage
+            await updateUserBalance();
             navigate(`/withdraw/success/${withdrawalId}`);
             return;
           } catch (err) {
