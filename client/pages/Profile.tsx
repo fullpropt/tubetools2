@@ -162,7 +162,7 @@ export default function Profile() {
                     YOUR BALANCE
                   </p>
                   <h2 className="text-5xl font-bold">
-                    ${balance.user.balance.toFixed(2)}
+                    ${(balance.user?.balance || 0).toFixed(2)}
                   </h2>
                 </div>
                 <Wallet className="h-8 w-8 opacity-80" />
@@ -270,9 +270,11 @@ export default function Profile() {
                   <div>
                     <p className="font-semibold">
                       Withdrawal pending: $
-                      {(typeof balance.pendingWithdrawal.amount === "string"
-                        ? parseFloat(balance.pendingWithdrawal.amount)
-                        : balance.pendingWithdrawal.amount
+                      {(balance.pendingWithdrawal?.amount ? 
+                        (typeof balance.pendingWithdrawal.amount === "string"
+                          ? parseFloat(balance.pendingWithdrawal.amount)
+                          : balance.pendingWithdrawal.amount
+                        ) : 0
                       ).toFixed(2)}
                     </p>
                     <p className="text-xs opacity-80">
@@ -328,7 +330,7 @@ export default function Profile() {
                           tx.type === "withdrawal_reversal"
                             ? "+"
                             : "-"}
-                          ${tx.amount.toFixed(2)}
+                          ${(tx.amount || 0).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">
                           {tx.status}
@@ -385,7 +387,7 @@ export default function Profile() {
                     EARNINGS
                   </p>
                   <p className="font-bold">
-                    ${(balance.user.balance - 213.19).toFixed(2)}
+                    ${((balance.user?.balance || 0) - 213.19).toFixed(2)}
                   </p>
                 </div>
               </div>
