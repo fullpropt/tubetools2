@@ -116,6 +116,29 @@ export default function Feed() {
     loadUserStats();
   }, [navigate]);
 
+  // Refresh daily votes when page gains focus (navigation between pages)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadUserStats();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    // Also refresh when component becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadUserStats();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   const loadUserStats = async () => {
     try {
       const data = await apiGet<any>("/api/balance");
