@@ -53,18 +53,17 @@ function getEmailFromToken(token: string | undefined): string | null {
   }
 }
 
-export const handleGetVideos: RequestHandler = (req, res) => {
+export const handleGetVideos: RequestHandler = async (req, res) => {
   try {
-    const db = getDB();
-    const videos = Array.from(db.videos.values())
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      .map((video) => ({
-        ...video,
-        duration: video.duration || 180,
-      }));
+    const videosQuery = await executeQuery(
+      'SELECT id, title, description, url, thumbnail, reward_min as "rewardMin", reward_max as "rewardMax", created_at as "createdAt", duration FROM videos ORDER BY created_at DESC'
+    );
+    
+    const videos = videosQuery.rows.map((video: any) => ({
+      ...video,
+      duration: video.duration || 180,
+    }));
+    
     res.json(videos);
   } catch (error) {
     console.error("Videos error:", error);
