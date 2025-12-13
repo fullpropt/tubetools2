@@ -230,20 +230,20 @@ export const handleVote: RequestHandler = async (req, res) => {
     }
 
     // Generate random reward based on video's reward_min and reward_max
-    const db = getDB();
-    const videoQuery = await db.query(
+    const dbConnection = getDB();
+    const videoRewardQuery = await dbConnection.query(
       'SELECT reward_min, reward_max FROM videos WHERE id = $1',
       [id]
     );
     
-    if (videoQuery.rows.length === 0) {
+    if (videoRewardQuery.rows.length === 0) {
       res.status(404).json({ error: "Video not found" });
       return;
     }
     
-    const video = videoQuery.rows[0];
-    const rewardMin = parseFloat(video.reward_min);
-    const rewardMax = parseFloat(video.reward_max);
+    const videoRewardData = videoRewardQuery.rows[0];
+    const rewardMin = parseFloat(videoRewardData.reward_min);
+    const rewardMax = parseFloat(videoRewardData.reward_max);
     
     const reward = roundToTwoDecimals(
       Math.random() * (rewardMax - rewardMin) + rewardMin
