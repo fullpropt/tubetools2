@@ -58,7 +58,7 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-semibold">{user.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${user.balance.toFixed(2)}
+                    ${(user.balance || 0).toFixed(2)}
                   </p>
                 </div>
                 <button
