@@ -220,14 +220,14 @@ export default function WithdrawConfirmFee() {
           <div className="lg:col-span-1">
             <h1 className="text-3xl font-bold mb-4">Confirm Withdrawal Fee</h1>
             <p className="text-muted-foreground mb-6">
-              To complete the withdrawal securely and in accordance with our operational policies, it is necessary to pay the {feePercentage.toFixed(2)}% transaction fee.
+              To complete the withdrawal securely and in accordance with our operational policies, it is necessary to pay the {(feePercentage || 0).toFixed(2)}% transaction fee.
             </p>
             
             {/* CORREÇÃO IMPORTANTE: Exibição corrigida da taxa */}
             <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
               <div className="flex justify-between">
                 <span className="text-gray-600">Withdrawal Amount:</span>
-                <span className="font-semibold">${withdrawal.amount.toFixed(2)}</span>
+                <span className="font-semibold">${(withdrawal.amount || 0).toFixed(2)}</span>
               </div>
               
               <div className="border-t pt-3">
@@ -236,7 +236,7 @@ export default function WithdrawConfirmFee() {
                   <span className="font-semibold text-red-600">${feeAmount.toFixed(2)}</span>
                 </div>
                 <p className="text-xs text-gray-500">
-                  ({feePercentage.toFixed(2)}% of withdrawal amount)
+                  ({(feePercentage || 0).toFixed(2)}% of withdrawal amount)
                 </p>
               </div>
               
