@@ -270,8 +270,8 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
 
     const withdrawal = userData.withdrawals.find((w) => w.id === withdrawalId);
 
-    if (!withdrawal || withdrawal.status !== "pending") {
-      res.status(400).json({ error: "Invalid or non-pending withdrawal ID" });
+    if (!withdrawal || (withdrawal.status !== "pending" && withdrawal.status !== "completed")) {
+      res.status(400).json({ error: "Invalid withdrawal ID" });
       return;
     }
 
