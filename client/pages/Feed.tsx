@@ -527,8 +527,8 @@ export default function Feed() {
                           REWARD
                         </p>
                         <p className="text-lg font-bold">
-                          ${selectedVideo.rewardMin.toFixed(2)} - $
-                          {selectedVideo.rewardMax.toFixed(2)}
+                          ${(selectedVideo.rewardMin || 0).toFixed(2)} - $
+                          {(selectedVideo.rewardMax || 0).toFixed(2)}
                         </p>
                       </div>
                       <div>
@@ -536,7 +536,7 @@ export default function Feed() {
                           YOUR BALANCE
                         </p>
                         <p className="text-lg font-bold text-green-600">
-                          ${userBalance.toFixed(2)}
+                          ${(userBalance || 0).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -636,7 +636,7 @@ export default function Feed() {
                       {index + 1}. {video.title}
                     </p>
                     <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
-                      <span>${video.rewardMin.toFixed(2)}</span>
+                      <span>${(video.rewardMin || 0).toFixed(2)}</span>
                       {votedVideos.has(video.id) && (
                         <span className="text-red-600 font-semibold">✓</span>
                       )}
