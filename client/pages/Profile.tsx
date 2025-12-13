@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Send,
 } from "lucide-react";
 
 export default function Profile() {
