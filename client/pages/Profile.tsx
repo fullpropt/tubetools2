@@ -49,6 +49,25 @@ export default function Profile() {
     try {
       const data = await apiGet<BalanceInfo>("/api/balance");
       setBalance(data);
+      
+      // Atualizar localStorage com dados mais recentes do banco
+      if (data.user) {
+        const currentUser = getUser();
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            balance: data.user.balance,
+            userName: data.user.name, // Corrigir: usar name do banco como userName
+            email: data.user.email,
+            createdAt: data.user.createdAt
+          };
+          setUser(updatedUser);
+          
+          // Atualizar estado local também
+          setUserName(data.user.name || "");
+        }
+      }
+      
       setError("");
     } catch (err) {
       console.error("Balance error:", err);
