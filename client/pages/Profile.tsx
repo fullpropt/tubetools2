@@ -356,7 +356,7 @@ export default function Profile() {
                 </p>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold">{userName}</p>
-                  <EditNameModal currentName={userName} onNameUpdated={handleNameUpdated} />
+                  {/* <EditNameModal currentName={userName} onNameUpdated={handleNameUpdated} /> */}
                 </div>
               </div>
               <div>
