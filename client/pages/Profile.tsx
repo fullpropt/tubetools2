@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { BalanceInfo } from "@shared/api";
+import { BalanceInfo, Transaction } from "@shared/api";
 import Layout from "@/components/Layout";
 import {
   Wallet,
