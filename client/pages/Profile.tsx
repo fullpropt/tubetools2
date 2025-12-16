@@ -37,8 +37,8 @@ export default function Profile() {
       return;
     }
 
-    // Don't load balance on mount - it's already updated by the voting event
-    // Just load transactions
+    // Load balance and transactions on mount
+    loadBalance();
     loadTransactions();
     
     return () => {
@@ -50,9 +50,6 @@ export default function Profile() {
 
   const loadBalance = async () => {
     if (isLoadingBalance) return;
-
-    // Only update balance if user is actually on Profile page
-    if (document.hidden) return;
 
     setIsLoadingBalance(true);
     try {
