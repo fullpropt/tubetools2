@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, clearAuth } from "@/lib/auth";
 import { LogOut, Play, Wallet } from "lucide-react";
@@ -11,7 +11,30 @@ interface LayoutProps {
 
 export default function Layout({ children, hideNav = false }: LayoutProps) {
   const navigate = useNavigate();
-  const user = getUser();
+  const [user, setUser] = useState(getUser());
+
+  // Update user state when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(getUser());
+    };
+
+    // Listen for storage changes (from other tabs)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also check periodically for direct localStorage changes
+    const interval = setInterval(() => {
+      const currentUser = getUser();
+      if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
+        setUser(currentUser);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [user]);
 
   const handleLogout = () => {
     clearAuth();
