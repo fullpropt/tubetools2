@@ -16,6 +16,7 @@ export interface UserProfile {
 
 export interface Vote {
   id: string;
+  userId: string;
   videoId: string;
   voteType: "like" | "dislike";
   rewardAmount: number;

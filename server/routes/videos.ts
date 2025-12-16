@@ -194,6 +194,7 @@ export const handleVote: RequestHandler = async (req, res) => {
 
     const user = userData.profile;
     const now = new Date();
+    const nowISO = now.toISOString();
 
     // Calculate hours since last reset
     const lastReset = user.lastVoteDateReset
@@ -258,14 +259,13 @@ export const handleVote: RequestHandler = async (req, res) => {
 
     // Create vote record
     const voteId = generateId();
-    const nowISO = now.toISOString();
-
     const vote = {
       id: voteId,
-      videoId: id,
+      userId: user.id,
+      videoId: video.id,
       voteType: voteType as "like" | "dislike",
       rewardAmount: reward,
-      createdAt: nowISO,
+      createdAt: now.toISOString(),
     };
 
     // Add vote to user data
