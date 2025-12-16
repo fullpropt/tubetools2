@@ -12,6 +12,89 @@ const port = process.env.PORT || 3000;
 // Database connection
 const sql = neon(process.env.DATABASE_URL || '');
 
+// Initialize database tables
+async function initializeDatabase() {
+  try {
+    // Create users table
+    await sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        balance DECIMAL(10,2) DEFAULT 0.00,
+        last_vote_reset TIMESTAMP DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create videos table
+    await sql`
+      CREATE TABLE IF NOT EXISTS videos (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        youtube_id VARCHAR(50) UNIQUE NOT NULL,
+        thumbnail VARCHAR(500),
+        reward_min DECIMAL(10,2) NOT NULL,
+        reward_max DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create votes table
+    await sql`
+      CREATE TABLE IF NOT EXISTS votes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+        reward DECIMAL(10,2) NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, video_id, DATE(timestamp))
+      )
+    `;
+
+    // Create transactions table
+    await sql`
+      CREATE TABLE IF NOT EXISTS transactions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        amount DECIMAL(10,2) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create bank details table
+    await sql`
+      CREATE TABLE IF NOT EXISTS bank_details (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        bank_name VARCHAR(255) NOT NULL,
+        account_number VARCHAR(255) NOT NULL,
+        account_holder VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Insert sample videos if empty
+    const videoCount = await sql`SELECT COUNT(*) as count FROM videos`;
+    if (videoCount[0].count === 0) {
+      await sql`
+        INSERT INTO videos (title, youtube_id, thumbnail, reward_min, reward_max) VALUES
+        ('Sample Video 1', 'abc123', 'https://img.youtube.com/vi/abc123/maxresdefault.jpg', 10.00, 50.00),
+        ('Sample Video 2', 'def456', 'https://img.youtube.com/vi/def456/maxresdefault.jpg', 15.00, 75.00),
+        ('Sample Video 3', 'ghi789', 'https://img.youtube.com/vi/ghi789/maxresdefault.jpg', 20.00, 100.00)
+        ON CONFLICT (youtube_id) DO NOTHING
+      `;
+    }
+
+    console.log('Database initialized successfully');
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+  }
+}
+
 // Simple HTTP server without Express
 const server = createHttpServer(async (req, res) => {
   // Enable CORS
@@ -168,6 +251,8 @@ const server = createHttpServer(async (req, res) => {
   res.end(JSON.stringify({ error: 'API endpoint not found' }));
 });
 
-server.listen(port, () => {
+server.listen(port, async () => {
   console.log(`HTTP server running on port ${port}`);
+  // Initialize database tables
+  await initializeDatabase();
 });
