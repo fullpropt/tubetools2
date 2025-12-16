@@ -56,26 +56,10 @@ export default function Profile() {
       const data = await apiGet<BalanceInfo>("/api/balance");
       setBalance(data);
 
-      // Atualizar localStorage com dados mais recentes do banco
+      // Don't update localStorage here - it's already updated by the voting event
+      // Just update local state
       if (data.user) {
-        const currentUser = getUser();
-        if (currentUser) {
-          // Only update if balance actually changed to prevent duplicate updates
-          if (data.user.balance !== currentUser.balance) {
-            const updatedUser = {
-              ...currentUser,
-              balance: data.user.balance,
-              userName: data.user.name, // Corrigir: usar name do banco como userName
-              email: data.user.email,
-              createdAt: data.user.createdAt
-            };
-            console.log('Profile: setUser called with balance:', data.user.balance);
-            setUser(updatedUser);
-          }
-          
-          // Atualizar estado local também
-          setUserName(data.user.name || "");
-        }
+        setUserName(data.user.name || "");
       }
       
       setError("");
