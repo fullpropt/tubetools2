@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 const sql = neon(process.env.DATABASE_URL || '');
 
 // Simple HTTP server without Express
-const server = createHttpServer((req, res) => {
+const server = createHttpServer(async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
