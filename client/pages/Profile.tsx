@@ -22,12 +22,14 @@ export default function Profile() {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<any>(null);
   const [withdrawMethod, setWithdrawMethod] = useState("bank-transfer");
   const [withdrawing, setWithdrawing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-  const [userName, setUserName] = useState(getUser()?.name || "");
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const user = getUser();
 
   useEffect(() => {
     if (!isAuthenticated()) {
