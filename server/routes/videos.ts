@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { getDB } from "../db";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
-import { executeQuery } from "../db-mysql";
+import { executeQuery } from "../db-postgres";
 import {
   getUserByEmail,
   updateUserProfile,

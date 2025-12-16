@@ -26,7 +26,7 @@ import {
   handleSimulateFeePayment,
   handleAddBankDetails,
 } from "./server/routes/withdrawals";
-import { seedVideos } from "./server/db-mysql";
+import { seedVideos } from "./server/db-postgres";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
