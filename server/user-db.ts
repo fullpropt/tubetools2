@@ -111,23 +111,8 @@ export async function loadUserData(email: string): Promise<UserData | null> {
         typeof v.createdAt === "string"
           ? v.createdAt
           : new Date(v.createdAt).toISOString();
-      const isToday = createdAtStr.split("T")[0] === today;
-      console.log("Vote debug:", {
-        id: v.id,
-        createdAt: v.createdAt,
-        createdAtStr,
-        today,
-        isToday
-      });
-      return isToday;
+      return createdAtStr.split("T")[0] === today;
     }).length;
-
-    console.log("Daily votes count debug:", {
-      email,
-      totalVotes: votes.rows.length,
-      votesToday,
-      today
-    });
 
     const profile: UserProfile = {
       id: user.id,
