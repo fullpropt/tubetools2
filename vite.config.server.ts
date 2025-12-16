@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   build: {
     lib: {
-      entry: "./server/node-build.ts",
+      entry: path.join(__dirname, "server/node-build.ts"),
       name: "server",
       fileName: "production",
       formats: ["es"],
