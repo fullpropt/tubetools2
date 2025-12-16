@@ -10,23 +10,23 @@ const port = process.env.PORT || 3000;
 const distPath = path.join(__dirname, "dist/spa");
 
 // Import all route handlers directly
-import { handleDemo } from "./server/routes/demo";
-import { handleSignup, handleLogin } from "./server/routes/auth";
+import { handleDemo } from "./server/routes/demo.ts";
+import { handleSignup, handleLogin } from "./server/routes/auth.ts";
 import {
   handleGetVideos,
   handleGetVideo,
   handleVote,
   handleGetDailyVotes,
-} from "./server/routes/videos";
-import { handleGetBalance, handleGetTransactions } from "./server/routes/balance";
+} from "./server/routes/videos.ts";
+import { handleGetBalance, handleGetTransactions } from "./server/routes/balance.ts";
 import {
   handleCreateWithdrawal,
   handleGetWithdrawals,
   handleCancelWithdrawal,
   handleSimulateFeePayment,
   handleAddBankDetails,
-} from "./server/routes/withdrawals";
-import { seedVideos } from "./server/db-postgres";
+} from "./server/routes/withdrawals.ts";
+import { seedVideos } from "./server/db-postgres.ts";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
