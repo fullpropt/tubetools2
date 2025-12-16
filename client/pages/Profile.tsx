@@ -37,11 +37,9 @@ export default function Profile() {
       return;
     }
 
-    loadBalance();
+    // Don't load balance on mount - it's already updated by the voting event
+    // Just load transactions
     loadTransactions();
-
-    // Temporarily disable interval to isolate duplication issue
-    // intervalRef.current = setInterval(loadBalance, 10000);
     
     return () => {
       if (intervalRef.current) {
@@ -52,7 +50,7 @@ export default function Profile() {
 
   const loadBalance = async () => {
     if (isLoadingBalance) return;
-    
+
     // Only update balance if user is actually on Profile page
     if (document.hidden) return;
 
@@ -60,7 +58,7 @@ export default function Profile() {
     try {
       const data = await apiGet<BalanceInfo>("/api/balance");
       setBalance(data);
-      
+
       // Atualizar localStorage com dados mais recentes do banco
       if (data.user) {
         const currentUser = getUser();
@@ -85,8 +83,8 @@ export default function Profile() {
       
       setError("");
     } catch (err) {
-      console.error("Balance error:", err);
-      setError(err instanceof Error ? err.message : "Failed to load balance");
+      console.error("Failed to load balance:", err);
+      setError("Failed to load balance");
     } finally {
       setIsLoadingBalance(false);
     }

@@ -15,9 +15,23 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
 
   // Update user state when localStorage changes
   useEffect(() => {
-    // Temporarily disable all auto-updates to isolate the duplication issue
+    const handleUserChange = (event: CustomEvent) => {
+      setUser(event.detail);
+    };
+
+    const handleStorageChange = () => {
+      setUser(getUser());
+    };
+
+    // Listen for custom user change events
+    window.addEventListener('userChanged', handleUserChange as EventListener);
+    
+    // Listen for storage changes (from other tabs)
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
-      // No event listeners for now
+      window.removeEventListener('userChanged', handleUserChange as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
