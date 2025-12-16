@@ -151,6 +151,15 @@ export default function Feed() {
       if (data.user) {
         setUserBalance(data.user.balance);
         setVotingStreak(data.user.votingStreak || 0);
+        
+        // Load voted videos from user data
+        if (data.user.votes && data.user.votes.rows) {
+          const votedVideoIds = new Set(
+            data.user.votes.rows.map((vote: any) => vote.videoId)
+          );
+          setVotedVideos(votedVideoIds);
+        }
+        
         // Update local storage with synced user data
         const authToken = localStorage.getItem("authToken");
         if (authToken) {
@@ -347,7 +356,9 @@ export default function Feed() {
   // Reduce duration by 1 second for voting threshold
   const effectiveDuration = Math.max(1, videoDuration - 1);
   const canVote =
-    watchedSeconds >= effectiveDuration && dailyVotesRemaining > 0;
+    watchedSeconds >= effectiveDuration && 
+    dailyVotesRemaining > 0 && 
+    !votedVideos.has(selectedVideo?.id || "");
   const watchProgressPercent = Math.min(
     effectiveDuration > 0 ? (watchedSeconds / effectiveDuration) * 100 : 0,
     100,
