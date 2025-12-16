@@ -31,11 +31,15 @@ function expressPlugin(mode: string): Plugin {
     async configureServer(server) {
       if (mode === "development") {
         // Lazy-load server dependencies only during dev serve, not during build
-        const { createServer } = await import("./server/index.ts");
-        const app = createServer();
-  
-        // Add Express app as middleware to Vite dev server
-        server.middlewares.use(app);
+        try {
+          const { createServer } = await import("./server/index.ts");
+          const app = createServer();
+    
+          // Add Express app as middleware to Vite dev server
+          server.middlewares.use(app);
+        } catch (error) {
+          console.warn("Server not available during build");
+        }
       }
     },
   };
