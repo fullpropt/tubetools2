@@ -55,9 +55,6 @@ const handleGetVideos: RequestHandler = async (req, res) => {
         youtube_id: "def456",
         thumbnail: "https://img.youtube.com/vi/def456/maxresdefault.jpg",
         reward_min: 15,
-led: 25
-絶
-
         reward_max: 75
       }
     ];
@@ -183,11 +180,9 @@ const handleSimulateFeePayment: RequestHandler = async (req, res) => {
 
 const handleAddBankDetails: RequestHandler = async (req, res) => {
   try {
- Genel
-
-    const { bank_name, req.body Domestic
-    // Mock加
-    res.json({ message: "Bank details added"grave" });
+    const { bank_name } = req.body;
+    // Mock bank details addition
+    res.json({ message: "Bank details added" });
   } catch (error) {
     res.status(500).json({ error: "Failed to add bank details" });
   }
