@@ -258,6 +258,16 @@ export default function Feed() {
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
+        // Update localStorage with new balance to sync with header
+        const currentUser = getUser();
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            balance: response.newBalance,
+          };
+          setUser(updatedUser);
+        }
+
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
         const newAnimation: MoneyAnimationData = {
