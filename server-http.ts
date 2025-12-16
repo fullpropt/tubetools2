@@ -12,9 +12,21 @@ const port = process.env.PORT || 3000;
 // Database connection
 const sql = neon(process.env.DATABASE_URL || '');
 
+// Check if DATABASE_URL is configured
+if (!process.env.DATABASE_URL) {
+  console.log('WARNING: DATABASE_URL not configured, using mock data');
+}
+
 // Initialize database tables
 async function initializeDatabase() {
+  if (!process.env.DATABASE_URL) {
+    console.log('Skipping database initialization - no DATABASE_URL configured');
+    return;
+  }
+  
   try {
+    console.log('Initializing database tables...');
+    
     // Create users table
     await sql`
       CREATE TABLE IF NOT EXISTS users (
@@ -189,6 +201,26 @@ const server = createHttpServer(async (req, res) => {
       { id: 1, amount: 25, type: 'vote', created_at: new Date().toISOString() },
       { id: 2, amount: 30, type: 'vote', created_at: new Date().toISOString() }
     ]));
+    return;
+  }
+
+  // Create database tables endpoint
+  if (url === '/api/setup-database' && method === 'POST') {
+    try {
+      if (!process.env.DATABASE_URL) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'DATABASE_URL not configured' }));
+        return;
+      }
+      
+      await initializeDatabase();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Database tables created successfully' }));
+    } catch (error) {
+      console.error('Database setup error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to create database tables', details: error.message }));
+    }
     return;
   }
 
