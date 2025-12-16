@@ -15,7 +15,7 @@
     "build": "npm run build:client",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
-    "start": "node dist/server/node-build.mjs",
+    "start": "serve -s dist/spa -l 3000",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
@@ -26,7 +26,8 @@
     "zod": "^3.25.76",
     "@neondatabase/serverless": "^1.0.2",
     "uuid": "^9.0.1",
-    "mysql2": "^3.6.5"
+    "mysql2": "^3.6.5",
+    "serve": "^14.2.1"
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.1",
