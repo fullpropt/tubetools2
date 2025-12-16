@@ -15,7 +15,7 @@
     "build": "npm run build:client",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
-    "start": "python3 -m http.server 3000 --directory dist/spa",
+    "start": "node server-statics.js",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
