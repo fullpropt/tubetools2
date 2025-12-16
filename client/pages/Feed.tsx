@@ -120,7 +120,8 @@ export default function Feed() {
   // Refresh daily votes when page gains focus (navigation between pages)
   useEffect(() => {
     const handleFocus = () => {
-      loadUserStats();
+      // Only refresh votes, not balance, to avoid overwriting recent vote updates
+      loadDailyVotesOnly();
     };
 
     window.addEventListener('focus', handleFocus);
@@ -128,7 +129,8 @@ export default function Feed() {
     // Also refresh when component becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        loadUserStats();
+        // Only refresh votes, not balance, to avoid overwriting recent vote updates
+        loadDailyVotesOnly();
       }
     };
     
@@ -144,6 +146,18 @@ export default function Feed() {
   useEffect(() => {
     loadUserStats();
   }, [location.key]);
+
+  const loadDailyVotesOnly = async () => {
+    try {
+      // Only refetch daily votes remaining and total votes from server
+      const voteData = await apiGet<any>("/api/daily-votes");
+      setDailyVotesRemaining(voteData.remaining || 7);
+      setTotalVideosWatched(voteData.totalVotes || 0);
+    } catch (err) {
+      // Silently fail - use local state
+      console.debug("Failed to load daily votes:", err);
+    }
+  };
 
   const loadUserStats = async () => {
     try {
