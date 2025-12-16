@@ -201,33 +201,51 @@ function createServer() {
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   // Example API routes
-  app.get(["/ping", "/api/ping"], (_req: any, res: any) => {
+  app.get("/ping", (_req: any, res: any) => {
+    const ping = process.env.PING_MESSAGE ?? "ping";
+    res.json({ message: ping });
+  });
+  app.get("/api/ping", (_req: any, res: any) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
   });
 
-  app.get(["/demo", "/api/demo"], handleDemo);
+  app.get("/demo", handleDemo);
+  app.get("/api/demo", handleDemo);
 
   // Auth routes
-  app.post(["/auth/signup", "/api/auth/signup"], handleSignup);
-  app.post(["/auth/login", "/api/auth/login"], handleLogin);
+  app.post("/auth/signup", handleSignup);
+  app.post("/api/auth/signup", handleSignup);
+  app.post("/auth/login", handleLogin);
+  app.post("/api/auth/login", handleLogin);
 
   // Video routes
-  app.get(["/videos", "/api/videos"], handleGetVideos);
-  app.get(["/videos/:id", "/api/videos/:id"], handleGetVideo);
-  app.post(["/videos/:id/vote", "/api/videos/:id/vote"], handleVote);
-  app.get(["/daily-votes", "/api/daily-votes"], handleGetDailyVotes);
+  app.get("/videos", handleGetVideos);
+  app.get("/api/videos", handleGetVideos);
+  app.get("/videos/:id", handleGetVideo);
+  app.get("/api/videos/:id", handleGetVideo);
+  app.post("/videos/:id/vote", handleVote);
+  app.post("/api/videos/:id/vote", handleVote);
+  app.get("/daily-votes", handleGetDailyVotes);
+  app.get("/api/daily-votes", handleGetDailyVotes);
 
   // Balance and transaction routes
-  app.get(["/balance", "/api/balance"], handleGetBalance);
-  app.get(["/transactions", "/api/transactions"], handleGetTransactions);
+  app.get("/balance", handleGetBalance);
+  app.get("/api/balance", handleGetBalance);
+  app.get("/transactions", handleGetTransactions);
+  app.get("/api/transactions", handleGetTransactions);
 
   // Withdrawal routes
-  app.post(["/withdrawals", "/api/withdrawals"], handleCreateWithdrawal);
-  app.get(["/withdrawals", "/api/withdrawals"], handleGetWithdrawals);
-  app.post(["/withdrawals/bank-details", "/api/withdrawals/bank-details"], handleAddBankDetails);
-  app.post(["/withdrawals/cancel", "/api/withdrawals/cancel"], handleCancelWithdrawal);
-  app.post(["/withdrawals/simulate-fee-payment", "/api/withdrawals/simulate-fee-payment"], handleSimulateFeePayment);
+  app.post("/withdrawals", handleCreateWithdrawal);
+  app.post("/api/withdrawals", handleCreateWithdrawal);
+  app.get("/withdrawals", handleGetWithdrawals);
+  app.get("/api/withdrawals", handleGetWithdrawals);
+  app.post("/withdrawals/bank-details", handleAddBankDetails);
+  app.post("/api/withdrawals/bank-details", handleAddBankDetails);
+  app.post("/withdrawals/cancel", handleCancelWithdrawal);
+  app.post("/api/withdrawals/cancel", handleCancelWithdrawal);
+  app.post("/withdrawals/simulate-fee-payment", handleSimulateFeePayment);
+  app.post("/api/withdrawals/simulate-fee-payment", handleSimulateFeePayment);
 
   return app;
 }
