@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
@@ -15,13 +15,14 @@ import {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const user = getUser();
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState(getUser()?.name || "");
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
-  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [withdrawMethod, setWithdrawMethod] = useState("bank-transfer");
   const [withdrawing, setWithdrawing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -37,13 +38,21 @@ export default function Profile() {
     loadBalance();
     loadTransactions();
 
-    // Refetch balance every 10 seconds to stay in sync with Feed
-    const interval = setInterval(loadBalance, 10000);
-    return () => clearInterval(interval);
+    // Only set interval when component is mounted
+    intervalRef.current = setInterval(loadBalance, 10000);
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [navigate]);
 
   const loadBalance = async () => {
     if (isLoadingBalance) return;
+    
+    // Only update balance if user is actually on Profile page
+    if (document.hidden) return;
 
     setIsLoadingBalance(true);
     try {
