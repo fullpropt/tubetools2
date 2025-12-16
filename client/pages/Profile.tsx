@@ -40,8 +40,8 @@ export default function Profile() {
     loadBalance();
     loadTransactions();
 
-    // Only set interval when component is mounted
-    intervalRef.current = setInterval(loadBalance, 10000);
+    // Temporarily disable interval to isolate duplication issue
+    // intervalRef.current = setInterval(loadBalance, 10000);
     
     return () => {
       if (intervalRef.current) {
