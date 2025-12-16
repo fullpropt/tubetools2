@@ -65,14 +65,17 @@ export default function Profile() {
       if (data.user) {
         const currentUser = getUser();
         if (currentUser) {
-          const updatedUser = {
-            ...currentUser,
-            balance: data.user.balance,
-            userName: data.user.name, // Corrigir: usar name do banco como userName
-            email: data.user.email,
-            createdAt: data.user.createdAt
-          };
-          setUser(updatedUser);
+          // Only update if balance actually changed to prevent duplicate updates
+          if (data.user.balance !== currentUser.balance) {
+            const updatedUser = {
+              ...currentUser,
+              balance: data.user.balance,
+              userName: data.user.name, // Corrigir: usar name do banco como userName
+              email: data.user.email,
+              createdAt: data.user.createdAt
+            };
+            setUser(updatedUser);
+          }
           
           // Atualizar estado local também
           setUserName(data.user.name || "");
