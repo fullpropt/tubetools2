@@ -74,6 +74,7 @@ export default function Profile() {
               email: data.user.email,
               createdAt: data.user.createdAt
             };
+            console.log('Profile: setUser called with balance:', data.user.balance);
             setUser(updatedUser);
           }
           

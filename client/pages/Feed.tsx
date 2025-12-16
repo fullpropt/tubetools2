@@ -291,6 +291,7 @@ export default function Feed() {
             ...currentUser,
             balance: response.newBalance,
           };
+          console.log('Feed: setUser called after vote with balance:', response.newBalance);
           setUser(updatedUser);
         }
 
