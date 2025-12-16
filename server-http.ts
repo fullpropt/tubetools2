@@ -2,10 +2,15 @@ import "dotenv/config";
 import { createServer as createHttpServer } from "http";
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { neon } from '@neondatabase/serverless';
+import jwt from 'jsonwebtoken';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const port = process.env.PORT || 3000;
+
+// Database connection
+const sql = neon(process.env.DATABASE_URL || '');
 
 // Simple HTTP server without Express
 const server = createHttpServer((req, res) => {
@@ -106,14 +111,56 @@ const server = createHttpServer((req, res) => {
 
   // Serve static files or fallback to index.html
   const distPath = path.join(__dirname, 'dist/spa');
-  const filePath = path.join(distPath, url === '/' ? 'index.html' : url);
   
   // For any non-API route, serve index.html (React Router)
   if (!url.startsWith('/api/') && method === 'GET') {
     const indexPath = path.join(distPath, 'index.html');
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end('<!-- TubeTools App -->\n<h1>TubeTools is running!</h1>\n<p>Frontend build not available in this minimal server</p>');
-    return;
+    
+    // Try to serve static file first
+    const filePath = path.join(distPath, url === '/' ? 'index.html' : url);
+    
+    // Simple file serving for built frontend
+    if (url === '/' || url.includes('.')) {
+      try {
+        const fs = await import('fs');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const ext = path.extname(filePath);
+        const contentType = ext === '.js' ? 'text/javascript' : 
+                           ext === '.css' ? 'text/css' : 
+                           'text/html';
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(fileContent);
+        return;
+      } catch (error) {
+        // File not found, serve index.html for SPA routing
+      }
+    }
+    
+    // Serve index.html for SPA routing
+    try {
+      const fs = await import('fs');
+      const indexContent = fs.readFileSync(indexPath, 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(indexContent);
+      return;
+    } catch (error) {
+      // If no build exists, serve basic HTML
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(`<!DOCTYPE html>
+<html>
+<head>
+    <title>TubeTools</title>
+</head>
+<body>
+    <div id="root">
+        <h1>TubeTools App</h1>
+        <p>Frontend build not available. Please run: npm run build:client</p>
+        <p><a href="/ping">Test API</a></p>
+    </div>
+</body>
+</html>`);
+      return;
+    }
   }
 
   // 404 for API routes
