@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { isAuthenticated, getUser } from "@/lib/auth";
+import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { Video, VoteResponse } from "@shared/api";
 import Layout from "@/components/Layout";
