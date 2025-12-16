@@ -15,6 +15,8 @@ export function getAuthToken(): string | null {
 
 export function setUser(user: UserData) {
   localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+  // Dispatch custom event to notify components of user data change
+  window.dispatchEvent(new CustomEvent('userChanged', { detail: user }));
 }
 
 export function getUser(): UserData | null {
