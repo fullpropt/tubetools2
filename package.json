@@ -15,7 +15,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
-    "start": "node dist/server/production.mjs",
+    "start": "node dist/server/node-build.mjs",
     "start:dev": "npx tsx server.ts",
     "import:videos": "npx tsx scripts/import-videos.ts",
     "test": "vitest --run",
