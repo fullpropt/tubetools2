@@ -10,7 +10,6 @@ const port = process.env.PORT || 3000;
 const distPath = path.join(__dirname, "dist/spa");
 
 // Import all route handlers directly
-import { handleDemo } from "./server/routes/demo";
 import { handleSignup, handleLogin } from "./server/routes/auth";
 import {
   handleGetVideos,
@@ -45,8 +44,6 @@ function createServer() {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
   });
-
-  app.get(["/demo", "/api/demo"], handleDemo);
 
   // Auth routes
   app.post(["/auth/signup", "/api/auth/signup"], handleSignup);
