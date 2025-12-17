@@ -16,17 +16,17 @@
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
     "start": "npx tsx server-http.ts",
+    "import:videos": "npx tsx scripts/import-videos.ts",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "zod": "^3.25.76",
-    "@neondatabase/serverless": "^1.0.2",
     "uuid": "^9.0.1",
-    "mysql2": "^3.6.5"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.1",

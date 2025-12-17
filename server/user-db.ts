@@ -84,24 +84,21 @@ export async function loadUserData(email: string): Promise<UserData | null> {
     );
 
     const withdrawals = await executeQuery(
-      `SELECT id, amount, status, requested_at as "requestedAt", processed_at as "completedAt", bank_details
+      `SELECT id, amount, status, requested_at as "requestedAt", processed_at as "completedAt", bank_details as "bankDetails"
        FROM withdrawals WHERE user_id = $1 ORDER BY requested_at DESC`,
       [user.id],
     );
 
-    // Process bank_details JSON for each withdrawal
+    // Process bank_details - PostgreSQL JSONB já retorna como objeto
     const processedWithdrawals = withdrawals.rows.map((w: any) => {
-      if (w.bank_details && typeof w.bank_details === 'string') {
+      // JSONB no PostgreSQL já é retornado como objeto, não precisa de parse
+      if (w.bankDetails && typeof w.bankDetails === 'string') {
         try {
-          w.bankDetails = JSON.parse(w.bank_details);
+          w.bankDetails = JSON.parse(w.bankDetails);
         } catch (e) {
           console.error('Failed to parse bank_details:', e);
           w.bankDetails = null;
         }
-      } else if (w.bank_details && typeof w.bank_details === 'object') {
-        w.bankDetails = w.bank_details;
-      } else {
-        w.bankDetails = null;
       }
       return w;
     });
@@ -353,11 +350,7 @@ export async function updateWithdrawal(
       return null;
     }
 
-    // Prepare bank details for storage (MySQL JSON support is limited, so we stringify)
-    const bankDetailsJson = withdrawal.bankDetails
-      ? JSON.stringify(withdrawal.bankDetails)
-      : null;
-
+    // PostgreSQL JSONB aceita objeto diretamente, não precisa de stringify
     await executeQuery(
       `UPDATE withdrawals 
        SET amount = $1, status = $2, processed_at = $3, bank_details = $4
@@ -366,7 +359,7 @@ export async function updateWithdrawal(
         withdrawal.amount,
         withdrawal.status,
         withdrawal.completedAt,
-        bankDetailsJson,
+        withdrawal.bankDetails ? JSON.stringify(withdrawal.bankDetails) : null,
         withdrawal.id,
         userData.profile.id,
       ],

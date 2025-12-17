@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { getDB } from "../db";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
 import { executeQuery } from "../db-postgres";
@@ -109,19 +108,26 @@ export const handleGetDailyVotes: RequestHandler = async (req, res) => {
   }
 };
 
-export const handleGetVideo: RequestHandler = (req, res) => {
+export const handleGetVideo: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const db = getDB();
-    const video = db.videos.get(id);
+    
+    // Buscar vídeo do banco de dados PostgreSQL
+    const videoQuery = await executeQuery(
+      'SELECT id, title, description, url, thumbnail, reward_min as "rewardMin", reward_max as "rewardMax", created_at as "createdAt", duration FROM videos WHERE id = $1',
+      [id]
+    );
 
-    if (!video) {
+    if (videoQuery.rows.length === 0) {
       res.status(404).json({ error: "Video not found" });
       return;
     }
 
+    const video = videoQuery.rows[0];
     res.json({
       ...video,
+      rewardMin: parseFloat(video.rewardMin) || 0,
+      rewardMax: parseFloat(video.rewardMax) || 0,
       duration: video.duration || 180,
     });
   } catch (error) {
@@ -160,14 +166,18 @@ export const handleVote: RequestHandler = async (req, res) => {
       return;
     }
 
-    const db = getDB();
-    const video = db.videos.get(id);
+    // Buscar vídeo do banco de dados PostgreSQL
+    const videoQuery = await executeQuery(
+      'SELECT id, title, description, url, thumbnail, reward_min, reward_max, duration FROM videos WHERE id = $1',
+      [id]
+    );
 
-    // If video not found, return error
-    if (!video) {
+    if (videoQuery.rows.length === 0) {
       res.status(404).json({ error: "Video not found" });
       return;
     }
+
+    const video = videoQuery.rows[0];
 
     console.log("[handleVote] Attempting to get user by email:", email);
     let userData = await getUserByEmail(email);
@@ -233,23 +243,10 @@ export const handleVote: RequestHandler = async (req, res) => {
     }
 
     // Generate random reward based on video's reward_min and reward_max
-    const videoRewardQuery = await executeQuery(
-      'SELECT reward_min, reward_max FROM videos WHERE id = $1',
-      [id]
-    );
+    const rewardMin = parseFloat(video.reward_min);
+    const rewardMax = parseFloat(video.reward_max);
     
-    console.log(`[Video Vote] Video ID: ${id}, Query result:`, videoRewardQuery.rows);
-    
-    if (videoRewardQuery.rows.length === 0) {
-      res.status(404).json({ error: "Video not found" });
-      return;
-    }
-    
-    const videoRewardData = videoRewardQuery.rows[0];
-    const rewardMin = parseFloat(videoRewardData.reward_min);
-    const rewardMax = parseFloat(videoRewardData.reward_max);
-    
-    console.log(`[Video Vote] Reward range: ${rewardMin} - ${rewardMax}`);
+    console.log(`[Video Vote] Video ID: ${id}, Reward range: ${rewardMin} - ${rewardMax}`);
     
     const reward = roundToTwoDecimals(
       Math.random() * (rewardMax - rewardMin) + rewardMin
