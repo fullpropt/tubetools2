@@ -117,30 +117,28 @@ export default function Feed() {
     loadUserStats();
   }, [navigate]);
 
-  // Refresh daily votes when page gains focus (navigation between pages)
-  useEffect(() => {
-    const handleFocus = () => {
-      // Only refresh votes, not balance, to avoid overwriting recent vote updates
-      loadDailyVotesOnly();
-    };
+  // Refresh user stats when page gains focus (navigation between pages)
+useEffect(() => {
+  const handleFocus = () => {
+    // Refresh balance and votes to avoid stale data
+    loadUserStats();  // ✅ AGORA CARREGA SALDO TAMBÉM
+  };
 
-    window.addEventListener('focus', handleFocus);
-    
-    // Also refresh when component becomes visible
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // Only refresh votes, not balance, to avoid overwriting recent vote updates
-        loadDailyVotesOnly();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  window.addEventListener('focus', handleFocus);
+  
+  const handleVisibilityChange = () => {
+    if (!document.hidden) {
+      loadUserStats();  // ✅ AGORA CARREGA SALDO TAMBÉM
+    }
+  };
+  
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  return () => {
+    window.removeEventListener('focus', handleFocus);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
+}, []);
 
   // Refresh when location changes (navigation back to this page)
   useEffect(() => {
