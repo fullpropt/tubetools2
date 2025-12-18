@@ -161,8 +161,8 @@ export default function Feed() {
     try {
       const data = await apiGet<any>("/api/balance");
       if (data.user) {
-        // Only update balance if it's different from current (to avoid overwriting recent vote updates)
-        }
+        // Update user data from server - server is the source of truth
+        setUser(data.user);
         setVotingStreak(data.user.votingStreak || 0);
         
         // Load voted videos from user data
