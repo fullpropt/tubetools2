@@ -161,11 +161,8 @@ export default function Feed() {
     try {
       const data = await apiGet<any>("/api/balance");
       if (data.user) {
-        // Update user state and localStorage to sync with header
-        setUser({
-          ...data.user,
-          votingDaysCount: data.user.votingDaysCount || 0,
-        });
+        // Only update balance if it's different from current (to avoid overwriting recent vote updates)
+        }
         setVotingStreak(data.user.votingStreak || 0);
         
         // Load voted videos from user data
@@ -282,16 +279,8 @@ export default function Feed() {
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
-        // Update localStorage with new balance to sync with header
-        const currentUser = getUser();
-        if (currentUser) {
-          const updatedUser = {
-            ...currentUser,
-            balance: response.newBalance,
-          };
-          console.log('Feed: setUser called after vote with balance:', response.newBalance);
-          setUser(updatedUser);
-        }
+        // Don't update balance here - let loadUserStats() fetch from server
+        // This prevents duplicate balance updates
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
