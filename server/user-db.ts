@@ -291,11 +291,19 @@ export async function addTransaction(
       ],
     );
 
-    // NOTE: Balance is already updated in the calling function (e.g., handleVote in videos.ts)
-    // Do NOT update balance here to avoid double-crediting
-    // The transaction record is purely for audit/history purposes
-    console.log(`[addTransaction] Transaction recorded: ${transaction.type} of ${transaction.amount}`);
+    if (transaction.type === "credit") {
+      userData.profile.balance += transaction.amount;
+      console.log(`[addTransaction] Credit: ${transaction.amount}, New balance: ${userData.profile.balance}`);
+    } else if (transaction.type === "debit") {
+      const oldBalance = userData.profile.balance;
+      userData.profile.balance = Math.max(
+        0,
+        userData.profile.balance - transaction.amount,
+      );
+      console.log(`[addTransaction] Debit: ${transaction.amount}, Old balance: ${oldBalance}, New balance: ${userData.profile.balance}`);
+    }
 
+    await saveUserData(email, userData);
     return await loadUserData(email);
   } catch (err) {
     console.error("Could not add transaction:", err);
@@ -382,6 +390,97 @@ export async function getPendingWithdrawal(
   }
 
   return userData.withdrawals.find((w) => w.status === "pending") || null;
+}
+
+
+export async function checkAndResetBalanceIfInactive(
+  email: string,
+): Promise<boolean> {
+  try {
+    const userData = await loadUserData(email);
+    if (!userData) {
+      return false;
+    }
+
+    const user = userData.profile;
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    
+    // Get yesterday's date
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+    // Check if user has votes today
+    const votesToday = userData.votes.filter((v: any) => {
+      const voteDate =
+        typeof v.createdAt === "string"
+          ? v.createdAt.split("T")[0]
+          : new Date(v.createdAt).toISOString().split("T")[0];
+      return voteDate === today;
+    }).length;
+
+    // If user has votes today, no need to reset
+    if (votesToday > 0) {
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} has ${votesToday} votes today, balance preserved`);
+      return false;
+    }
+
+    // Check if user has votes yesterday
+    const votesYesterday = userData.votes.filter((v: any) => {
+      const voteDate =
+        typeof v.createdAt === "string"
+          ? v.createdAt.split("T")[0]
+          : new Date(v.createdAt).toISOString().split("T")[0];
+      return voteDate === yesterdayStr;
+    }).length;
+
+    // If user has no votes today and no votes yesterday, reset balance
+    if (votesYesterday === 0 && user.balance > 0) {
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} has no votes yesterday, resetting balance from ${user.balance} to 0`);
+      
+      // Reset balance to 0
+      user.balance = 0;
+      
+      // Reset voting streak
+      user.votingStreak = 0;
+      
+      // Save the updated profile
+      await saveUserData(email, userData);
+      
+      // Add a debit transaction for the reset
+      const transactionId = generateId();
+      const transaction = {
+        id: transactionId,
+        type: "debit" as const,
+        amount: userData.profile.balance,
+        description: "Balance reset due to inactivity (no vote in 24 hours)",
+        status: "completed" as const,
+        createdAt: now.toISOString(),
+      };
+      
+      await executeQuery(
+        `INSERT INTO transactions (id, user_id, type, amount, description, status, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          transaction.id,
+          userData.profile.id,
+          transaction.type,
+          transaction.amount,
+          transaction.description,
+          transaction.status,
+          transaction.createdAt,
+        ],
+      );
+      
+      return true; // Balance was reset
+    }
+
+    return false; // No reset needed
+  } catch (err) {
+    console.error("Error checking and resetting balance:", err);
+    return false;
+  }
 }
 
 export async function getVotedVideoIds(email: string): Promise<string[]> {

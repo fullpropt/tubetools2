@@ -9,6 +9,7 @@ import {
   addTransaction,
   getDailyVoteCount,
   generateId,
+  checkAndResetBalanceIfInactive,
 } from "../user-db";
 
 function getEmailFromToken(token: string | undefined): string | null {
