@@ -42,7 +42,6 @@ export default function Feed() {
   const [selectedVideo, setSelectedVideo] = useState<EnhancedVideo | null>(
     null,
   );
-  const [userBalance, setUserBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
   const [votedVideos, setVotedVideos] = useState<Set<string>>(new Set());
@@ -109,7 +108,6 @@ export default function Feed() {
 
     const user = getUser();
     if (user) {
-      setUserBalance(user.balance);
       setVotingStreak(user.votingStreak || 0);
     }
 
@@ -117,28 +115,30 @@ export default function Feed() {
     loadUserStats();
   }, [navigate]);
 
-  // Refresh user stats when page gains focus (navigation between pages)
-useEffect(() => {
-  const handleFocus = () => {
-    // Refresh balance and votes to avoid stale data
-    loadUserStats();  // ✅ AGORA CARREGA SALDO TAMBÉM
-  };
+  // Refresh daily votes when page gains focus (navigation between pages)
+  useEffect(() => {
+    const handleFocus = () => {
+      // Only refresh votes, not balance, to avoid overwriting recent vote updates
+      loadDailyVotesOnly();
+    };
 
-  window.addEventListener('focus', handleFocus);
-  
-  const handleVisibilityChange = () => {
-    if (!document.hidden) {
-      loadUserStats();  // ✅ AGORA CARREGA SALDO TAMBÉM
-    }
-  };
-  
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  
-  return () => {
-    window.removeEventListener('focus', handleFocus);
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-  };
-}, []);
+    window.addEventListener('focus', handleFocus);
+    
+    // Also refresh when component becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Only refresh votes, not balance, to avoid overwriting recent vote updates
+        loadDailyVotesOnly();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Refresh when location changes (navigation back to this page)
   useEffect(() => {
@@ -162,8 +162,6 @@ useEffect(() => {
       const data = await apiGet<any>("/api/balance");
       if (data.user) {
         // Only update balance if it's different from current (to avoid overwriting recent vote updates)
-        if (data.user.balance !== userBalance) {
-          setUserBalance(data.user.balance);
         }
         setVotingStreak(data.user.votingStreak || 0);
         
@@ -275,7 +273,6 @@ useEffect(() => {
           voteType,
         });
 
-        setUserBalance(response.newBalance);
         setVotedVideos((prev) => new Set([...prev, videoId]));
         setDailyVotesRemaining(response.dailyVotesRemaining || 0);
         setTotalVideosWatched((prev) => prev + 1);
@@ -594,7 +591,7 @@ useEffect(() => {
                           YOUR BALANCE
                         </p>
                         <p className="text-lg font-bold text-green-600">
-                          ${(userBalance || 0).toFixed(2)}
+                          ${(getUser()?.balance || 0).toFixed(2)}
                         </p>
                       </div>
                     </div>
