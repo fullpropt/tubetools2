@@ -676,7 +676,7 @@ export default function Feed() {
             </div>
 
             {/* Videos Sidebar - Desktop Only */}
-            <div className="space-y-3 hidden lg:block">
+            <div className="space-y-3 hidden lg:flex lg:flex-col">
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <Play className="h-4 w-4" />
                 Playlist
