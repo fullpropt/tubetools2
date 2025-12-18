@@ -661,7 +661,54 @@ export default function Feed() {
                     <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-200 text-sm">
                       {error}
                     </div>
-                  )}
+                  
+              {/* Mobile Playlist - Below Vote Buttons */}
+              <div className="lg:hidden mt-6">
+                <h3 className="font-bold text-lg flex items-center gap-2 mb-3">
+                  <Play className="h-4 w-4" />
+                  Playlist
+                </h3>
+                <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
+                  {displayedVideos.slice(0, 10).map((video, index) => (
+                    <button
+                      key={`${video.id}-${index}`}
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        setWatchedSeconds(0);
+                      }}
+                      className={`w-full text-left p-2 rounded-lg border transition-colors ${
+                        selectedVideo?.id === video.id
+                          ? "border-red-600 bg-red-50 dark:bg-red-950"
+                          : "border-border hover:bg-muted"
+                      }`}
+                    >
+                      <div className="aspect-video bg-black/5 rounded mb-2 flex items-center justify-center overflow-hidden relative group">
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                          <Play className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <div className="absolute top-1 right-1 text-xs font-bold text-yellow-600 bg-black/70 px-1.5 py-0.5 rounded">
+                          {video.rating || 5}/10
+                        </div>
+                      </div>
+                      <p className="text-xs font-semibold line-clamp-2">
+                        {index + 1}. {video.title}
+                      </p>
+                      <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
+                        <span>${(video.rewardMin || 0).toFixed(2)}</span>
+                        {votedVideos.has(video.id) && (
+                          <span className="text-red-600 font-semibold">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
                 </>
               ) : loading ? (
                 <div className="flex items-center justify-center min-h-96 card-base">
@@ -676,12 +723,12 @@ export default function Feed() {
             </div>
 
             {/* Videos Sidebar - Desktop Only */}
-            <div className="space-y-3 hidden lg:flex lg:flex-col">
+            <div className="space-y-3 hidden lg:block">
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <Play className="h-4 w-4" />
                 Playlist
               </h3>
-              <div className="space-y-2 max-h-[calc(100vh-120px)] overflow-y-auto">
+              <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {displayedVideos.slice(0, 10).map((video, index) => (
                   <button
                     key={`${video.id}-${index}`}
