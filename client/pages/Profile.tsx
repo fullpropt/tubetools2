@@ -56,9 +56,12 @@ export default function Profile() {
       const data = await apiGet<BalanceInfo>("/api/balance");
       setBalance(data);
 
-      // Don't update localStorage here - it's already updated by the voting event
-      // Just update local state
+      // Update localStorage to sync with Feed page
       if (data.user) {
+        setUser({
+          ...data.user,
+          votingDaysCount: data.user.votingDaysCount || 0,
+        });
         setUserName(data.user.name || "");
       }
       
