@@ -9,7 +9,6 @@ import {
   addTransaction,
   getDailyVoteCount,
   generateId,
-  checkAndResetBalanceIfInactive,
 } from "../user-db";
 
 function getEmailFromToken(token: string | undefined): string | null {
@@ -55,8 +54,14 @@ function getEmailFromToken(token: string | undefined): string | null {
 
 export const handleGetVideos: RequestHandler = async (req, res) => {
   try {
+    // Buscar todos os vídeos em ordem aleatória
+    // Sem limite, suporta qualquer quantidade de vídeos
     const videosQuery = await executeQuery(
-      'SELECT id, title, description, url, thumbnail, reward_min as "rewardMin", reward_max as "rewardMax", created_at as "createdAt", duration FROM videos ORDER BY created_at DESC'
+      `SELECT id, title, description, url, thumbnail, 
+              reward_min as "rewardMin", reward_max as "rewardMax", 
+              created_at as "createdAt", duration 
+       FROM videos 
+       ORDER BY RANDOM()`
     );
     
     const videos = videosQuery.rows.map((video: any) => ({
@@ -66,6 +71,7 @@ export const handleGetVideos: RequestHandler = async (req, res) => {
       duration: video.duration || 180,
     }));
     
+    console.log(`[Videos] Loaded ${videos.length} advertisement videos in random order`);
     res.json(videos);
   } catch (error) {
     console.error("Videos error:", error);
