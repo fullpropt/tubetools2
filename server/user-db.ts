@@ -291,19 +291,11 @@ export async function addTransaction(
       ],
     );
 
-    if (transaction.type === "credit") {
-      userData.profile.balance += transaction.amount;
-      console.log(`[addTransaction] Credit: ${transaction.amount}, New balance: ${userData.profile.balance}`);
-    } else if (transaction.type === "debit") {
-      const oldBalance = userData.profile.balance;
-      userData.profile.balance = Math.max(
-        0,
-        userData.profile.balance - transaction.amount,
-      );
-      console.log(`[addTransaction] Debit: ${transaction.amount}, Old balance: ${oldBalance}, New balance: ${userData.profile.balance}`);
-    }
+    // NOTE: Balance is already updated in the calling function (e.g., handleVote in videos.ts)
+    // Do NOT update balance here to avoid double-crediting
+    // The transaction record is purely for audit/history purposes
+    console.log(`[addTransaction] Transaction recorded: ${transaction.type} of ${transaction.amount}`);
 
-    await saveUserData(email, userData);
     return await loadUserData(email);
   } catch (err) {
     console.error("Could not add transaction:", err);
