@@ -56,10 +56,15 @@ export default function Profile() {
       const data = await apiGet<BalanceInfo>("/api/balance");
       setBalance(data);
 
-      // Don't update localStorage here - it's already updated by the voting event
-      // Just update local state
+      // Update localStorage with fresh data from server
+      // This ensures the balance is always in sync
       if (data.user) {
         setUserName(data.user.name || "");
+        // Update localStorage with the fresh user data from server
+        const authToken = localStorage.getItem("authToken");
+        if (authToken) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
       }
       
       setError("");
