@@ -681,7 +681,7 @@ export default function Feed() {
                 <Play className="h-4 w-4" />
                 Playlist
               </h3>
-              <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="space-y-2 max-h-[calc(100vh-120px)] overflow-y-auto">
                 {displayedVideos.slice(0, 10).map((video, index) => (
                   <button
                     key={`${video.id}-${index}`}
