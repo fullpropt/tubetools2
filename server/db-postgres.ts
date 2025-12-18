@@ -1,6 +1,6 @@
-import { neon } from '@neondatabase/serverless';
+import { Pool } from 'pg';
 
-let pool: any = null;
+let pool: Pool | null = null;
 
 export function getPool() {
   if (!pool) {
@@ -16,12 +16,24 @@ export function getPool() {
     }
 
     console.log("[getPool] Creating new PostgreSQL pool with DATABASE_URL");
-    pool = neon(connectionString);
+    pool = new Pool({
+      connectionString: connectionString,
+      // Connection pool settings
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    });
+
+    // Handle pool errors
+    pool.on('error', (err) => {
+      console.error('[Pool] Unexpected error on idle client', err);
+    });
   }
   return pool;
 }
 
 export async function executeQuery(sql: string, params: any[] = []) {
+  let client;
   try {
     console.log(
       "[executeQuery] Executing SQL:",
@@ -31,7 +43,8 @@ export async function executeQuery(sql: string, params: any[] = []) {
     );
 
     const pool = getPool();
-    const results = await pool.query(sql, params);
+    client = await pool.connect();
+    const results = await client.query(sql, params);
 
     console.log(
       "[executeQuery] Query successful, rows:",
@@ -48,6 +61,10 @@ export async function executeQuery(sql: string, params: any[] = []) {
       err instanceof Error ? err.message : err,
     );
     throw err;
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }
 

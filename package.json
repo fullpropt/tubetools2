@@ -23,11 +23,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "pg": "^8.11.3",
+    "zod": "^3.25.76",
     "uuid": "^9.0.1",
-    "zod": "^3.25.76"
+    "mysql2": "^3.6.5"
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.1",
