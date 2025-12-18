@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Calendar,
   Star,
+  Target,
 } from "lucide-react";
 
 interface MoneyAnimationData {
@@ -149,7 +150,7 @@ export default function Feed() {
     try {
       // Only refetch daily votes remaining and total votes from server
       const voteData = await apiGet<any>("/api/daily-votes");
-      setDailyVotesRemaining(voteData.remaining || 7);
+      setDailyVotesRemaining(voteData.remaining || 0);
       setTotalVideosWatched(voteData.totalVotes || 0);
     } catch (err) {
       // Silently fail - use local state
@@ -161,8 +162,8 @@ export default function Feed() {
     try {
       const data = await apiGet<any>("/api/balance");
       if (data.user) {
-        // Update user data from server - server is the source of truth
-        setUser(data.user);
+        // Only update balance if it's different from current (to avoid overwriting recent vote updates)
+        }
         setVotingStreak(data.user.votingStreak || 0);
         
         // Load voted videos from user data
@@ -188,7 +189,7 @@ export default function Feed() {
 
       // Refetch daily votes remaining and total votes from server
       const voteData = await apiGet<any>("/api/daily-votes");
-      setDailyVotesRemaining(voteData.remaining || 7);
+      setDailyVotesRemaining(voteData.remaining || 0);
       setTotalVideosWatched(voteData.totalVotes || 0);
     } catch (err) {
       // Silently fail - use local state
@@ -428,6 +429,36 @@ export default function Feed() {
                     </div>
                     <span className="text-xl">🔥</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Voting Days Progress Bar */}
+              <div className="card-base p-4 bg-gradient-to-r from-purple-600/10 to-purple-600/5 border-purple-200 dark:border-purple-900">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-purple-600" />
+                      <p className="text-sm font-semibold text-muted-foreground">
+                        Voting Streak Goal
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-purple-600">
+                      {votingDaysCount} / 20 days
+                    </p>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out rounded-full"
+                      style={{
+                        width: `${Math.min((votingDaysCount / 20) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {votingDaysCount >= 20
+                      ? "🎉 Goal achieved! Keep the streak going!"
+                      : `${20 - votingDaysCount} more days to reach your goal`}
+                  </p>
                 </div>
               </div>
 
