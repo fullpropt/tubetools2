@@ -2,6 +2,47 @@ import { RequestHandler } from "express";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
 import { executeQuery } from "../db-postgres";
+// server/routes/videos.ts
+import { getAdvertisementVideos } from '../services/youtube-service';
+
+export const handleGetVideos: RequestHandler = async (req, res) => {
+  try {
+    // Tentar buscar do YouTube
+    let videos = await getAdvertisementVideos();
+
+    // Se falhar, usar banco de dados como fallback
+    if (videos.length === 0) {
+      console.log('[Videos] Falling back to database videos');
+      const dbVideos = await executeQuery(
+        `SELECT id, title, description, url, thumbnail, 
+                reward_min as "rewardMin", reward_max as "rewardMax", 
+                created_at as "createdAt", duration 
+         FROM videos 
+         ORDER BY RANDOM()`
+      );
+
+      videos = dbVideos.rows.map((video: any) => ({
+        ...video,
+        rewardMin: parseFloat(video.rewardMin) || 0,
+        rewardMax: parseFloat(video.rewardMax) || 0,
+        duration: video.duration || 180,
+      }));
+    } else {
+      // Adicionar recompensa aleatória aos vídeos do YouTube
+      videos = videos.map((video: any) => ({
+        ...video,
+        rewardMin: parseFloat((Math.random() * 5 + 2).toFixed(2)),
+        rewardMax: parseFloat((Math.random() * 10 + 5).toFixed(2)),
+      }));
+    }
+
+    console.log(`[Videos] Loaded ${videos.length} advertisement videos`);
+    res.json(videos);
+  } catch (error) {
+    console.error("Videos error:", error);
+    res.status(500).json({ error: "Failed to fetch videos" });
+  }
+};
 import {
   getUserByEmail,
   updateUserProfile,
