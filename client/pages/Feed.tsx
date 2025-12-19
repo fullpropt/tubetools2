@@ -273,8 +273,6 @@ export default function Feed() {
         });
 
         setVotedVideos((prev) => new Set([...prev, videoId]));
-        setDailyVotesRemaining(response.dailyVotesRemaining || 0);
-        setTotalVideosWatched((prev) => prev + 1);
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
@@ -286,6 +284,9 @@ export default function Feed() {
           };
           setUser(updatedUser);
         }
+
+        // Recarregar dados de votos diários do servidor para manter sincronizado
+        await loadDailyVotesOnly();
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -336,6 +337,8 @@ export default function Feed() {
       votingDaysCount,
       displayedVideos,
       allVideos,
+      user,
+      loadDailyVotesOnly,
     ],
   );
 
