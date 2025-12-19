@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
-import { getAdvertisementVideos } from '../services/youtube-service';
+import { getAdvertisementVideos, getVideoDetails } from '../services/youtube-service';
 import { executeQuery } from "../db-postgres";
-import { getUserByEmail, addVote, addTransaction, getDailyVoteCount, generateId } from "../user-db";
+import { getUserByEmail, addVote, addTransaction, getDailyVoteCount, generateId, updateUserProfile } from "../user-db";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
 
@@ -113,11 +113,33 @@ export const handleVote: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Invalid vote type" });
     }
 
+    // Tenta buscar o vídeo no banco de dados
     const videoQuery = await executeQuery('SELECT * FROM videos WHERE id = $1', [id]);
-    if (videoQuery.rows.length === 0) {
-      return res.status(404).json({ error: "Video not found" });
+    
+    let rewardMin = 2.0;
+    let rewardMax = 8.0;
+    let videoTitle = "YouTube Video";
+
+    if (videoQuery.rows.length > 0) {
+      // Vídeo encontrado no banco de dados
+      const video = videoQuery.rows[0];
+      rewardMin = parseFloat(video.reward_min);
+      rewardMax = parseFloat(video.reward_max);
+      videoTitle = video.title;
+    } else {
+      // Vídeo não encontrado no banco, busca detalhes na API do YouTube para calcular recompensa justa
+      console.log(`[Vote] Video ${id} not found in DB, fetching details from YouTube API...`);
+      const youtubeVideo = await getVideoDetails(id);
+      
+      if (youtubeVideo) {
+        rewardMin = youtubeVideo.rewardMin;
+        rewardMax = youtubeVideo.rewardMax;
+        videoTitle = youtubeVideo.title;
+        console.log(`[Vote] Fetched YouTube video details. Reward range: ${rewardMin} - ${rewardMax}`);
+      } else {
+        console.warn(`[Vote] Could not fetch details for video ${id}. Using default rewards.`);
+      }
     }
-    const video = videoQuery.rows[0];
 
     let userData = await getUserByEmail(email);
     if (!userData) return res.status(404).json({ error: "User not found" });
@@ -127,14 +149,12 @@ export const handleVote: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "You've reached your daily vote limit (10 votes)" });
     }
 
-    const rewardMin = parseFloat(video.reward_min);
-    const rewardMax = parseFloat(video.reward_max);
     const reward = roundToTwoDecimals(Math.random() * (rewardMax - rewardMin) + rewardMin);
 
     const vote = {
       id: generateId(),
       userId: userData.profile.id,
-      videoId: video.id,
+      videoId: id,
       voteType: voteType as "like" | "dislike",
       rewardAmount: reward,
       createdAt: new Date().toISOString(),
@@ -150,7 +170,7 @@ export const handleVote: RequestHandler = async (req, res) => {
       id: generateId(),
       type: "credit" as const,
       amount: reward,
-      description: `Video vote reward - ${video.title}`,
+      description: `Video vote reward - ${videoTitle}`,
       status: "completed" as const,
       createdAt: new Date().toISOString(),
     };

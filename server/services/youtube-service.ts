@@ -124,6 +124,51 @@ export async function searchAdvertisementVideos(
   }
 }
 
+// Nova função para buscar detalhes de um único vídeo
+export async function getVideoDetails(videoId: string): Promise<YouTubeVideo | null> {
+  try {
+    if (!YOUTUBE_API_KEY) {
+      console.warn('[YouTube] API key is not configured. Cannot fetch video details.');
+      return null;
+    }
+
+    const response = await axios.get(
+      `${YOUTUBE_API_BASE}/videos`,
+      {
+        params: {
+          key: YOUTUBE_API_KEY,
+          id: videoId,
+          part: 'snippet,contentDetails',
+        }
+      }
+    );
+
+    if (!response.data.items || response.data.items.length === 0) {
+      return null;
+    }
+
+    const item = response.data.items[0];
+    const durationString = item.contentDetails.duration;
+    const duration = parseDuration(durationString);
+    const rewards = calculateRewards(duration);
+
+    return {
+      id: item.id,
+      title: item.snippet.title,
+      description: item.snippet.description,
+      thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default.url,
+      url: `https://www.youtube.com/embed/${item.id}`,
+      duration: Math.max(duration, 30),
+      rewardMin: rewards.min,
+      rewardMax: rewards.max,
+      channelTitle: item.snippet.channelTitle,
+    };
+  } catch (error) {
+    console.error(`[YouTube] Error fetching details for video ${videoId}:`, error);
+    return null;
+  }
+}
+
 const videoCache: { videos: YouTubeVideo[]; timestamp: number } = {
   videos: [],
   timestamp: 0,
