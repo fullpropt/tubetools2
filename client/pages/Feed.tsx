@@ -359,10 +359,12 @@ export default function Feed() {
 
   // Reduce duration by 1 second for voting threshold
   const effectiveDuration = Math.max(1, videoDuration - 1);
+  
+  // FIX: Allow clicking the button even if not watched fully, so we can show the error message
   const canVote =
-    watchedSeconds >= effectiveDuration && 
     dailyVotesRemaining > 0 && 
     !votedVideos.has(selectedVideo?.id || "");
+    
   const watchProgressPercent = Math.min(
     effectiveDuration > 0 ? (watchedSeconds / effectiveDuration) * 100 : 0,
     100,
