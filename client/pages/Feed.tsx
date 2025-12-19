@@ -278,8 +278,14 @@ export default function Feed() {
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
-        // Atualizar saldo do usuário em tempo real após o voto
-        await loadUserStats();
+        // Atualizar saldo do usuário apenas (sem recarregar tudo)
+        if (user) {
+          const updatedUser = {
+            ...user,
+            balance: response.newBalance || user.balance,
+          };
+          setUser(updatedUser);
+        }
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
