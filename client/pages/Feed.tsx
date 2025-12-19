@@ -278,8 +278,8 @@ export default function Feed() {
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
-        // Don't update balance here - let loadUserStats() fetch from server
-        // This prevents duplicate balance updates
+        // Atualizar saldo do usuário em tempo real após o voto
+        await loadUserStats();
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
