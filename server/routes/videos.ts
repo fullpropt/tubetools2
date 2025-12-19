@@ -1,18 +1,20 @@
+# Corrigido: server/routes/videos.ts
 import { RequestHandler } from "express";
+import { getAdvertisementVideos } from '../services/youtube-service';
+import { executeQuery } from "../db-postgres";
+import { getUserByEmail, addVote, addTransaction, getDailyVoteCount, generateId } from "../user-db";
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
-import { executeQuery } from "../db-postgres";
-// server/routes/videos.ts
-import { getAdvertisementVideos } from '../services/youtube-service';
 
+// ######### FUNÇÃO UNIFICADA E CORRIGIDA #########
 export const handleGetVideos: RequestHandler = async (req, res) => {
   try {
-    // Tentar buscar do YouTube
+    // 1. Tenta buscar vídeos da API do YouTube
     let videos = await getAdvertisementVideos();
 
-    // Se falhar, usar banco de dados como fallback
-    if (videos.length === 0) {
-      console.log('[Videos] Falling back to database videos');
+    // 2. Se a API do YouTube não retornar vídeos, usa o banco de dados como fallback
+    if (!videos || videos.length === 0) {
+      console.log('[Videos] YouTube API failed or returned no videos. Falling back to database.');
       const dbVideos = await executeQuery(
         `SELECT id, title, description, url, thumbnail, 
                 reward_min as "rewardMin", reward_max as "rewardMax", 
@@ -27,65 +29,30 @@ export const handleGetVideos: RequestHandler = async (req, res) => {
         rewardMax: parseFloat(video.rewardMax) || 0,
         duration: video.duration || 180,
       }));
-    } else {
-      // Adicionar recompensa aleatória aos vídeos do YouTube
-      videos = videos.map((video: any) => ({
-        ...video,
-        rewardMin: parseFloat((Math.random() * 5 + 2).toFixed(2)),
-        rewardMax: parseFloat((Math.random() * 10 + 5).toFixed(2)),
-      }));
     }
 
-    console.log(`[Videos] Loaded ${videos.length} advertisement videos`);
+    console.log(`[Videos] Loaded ${videos.length} advertisement videos.`);
     res.json(videos);
   } catch (error) {
-    console.error("Videos error:", error);
+    console.error("[Videos] Error fetching videos:", error);
     res.status(500).json({ error: "Failed to fetch videos" });
   }
 };
-import {
-  getUserByEmail,
-  updateUserProfile,
-  addVote,
-  addTransaction,
-  getDailyVoteCount,
-  generateId,
-} from "../user-db";
+
+// ######### RESTANTE DO CÓDIGO ORIGINAL #########
 
 function getEmailFromToken(token: string | undefined): string | null {
   if (!token) {
     console.warn("[Videos] No authorization token provided");
     return null;
   }
-
   try {
-    console.log("[Videos] Raw token:", token.substring(0, 50) + "...");
-
-    // Remove "Bearer " prefix if present
-    let tokenValue = token;
-    if (token.startsWith("Bearer ")) {
-      tokenValue = token.slice(7);
-    }
-
-    console.log(
-      "[Videos] Token value after Bearer removal:",
-      tokenValue.substring(0, 30) + "...",
-    );
-
-    // Decode from base64
+    let tokenValue = token.startsWith("Bearer ") ? token.slice(7) : token;
     const email = Buffer.from(tokenValue, "base64").toString("utf-8").trim();
-
-    if (!email || email.length === 0) {
+    if (!email) {
       console.warn("[Videos] Email is empty after decoding");
       return null;
     }
-
-    console.log(
-      "[Videos] Extracted email from token:",
-      email,
-      "Length:",
-      email.length,
-    );
     return email;
   } catch (err) {
     console.error("[Videos] Error decoding token:", err);
@@ -93,62 +60,19 @@ function getEmailFromToken(token: string | undefined): string | null {
   }
 }
 
-export const handleGetVideos: RequestHandler = async (req, res) => {
-  try {
-    // Buscar todos os vídeos em ordem aleatória
-    // Sem limite, suporta qualquer quantidade de vídeos
-    const videosQuery = await executeQuery(
-      `SELECT id, title, description, url, thumbnail, 
-              reward_min as "rewardMin", reward_max as "rewardMax", 
-              created_at as "createdAt", duration 
-       FROM videos 
-       ORDER BY RANDOM()`
-    );
-    
-    const videos = videosQuery.rows.map((video: any) => ({
-      ...video,
-      rewardMin: parseFloat(video.rewardMin) || 0,
-      rewardMax: parseFloat(video.rewardMax) || 0,
-      duration: video.duration || 180,
-    }));
-    
-    console.log(`[Videos] Loaded ${videos.length} advertisement videos in random order`);
-    res.json(videos);
-  } catch (error) {
-    console.error("Videos error:", error);
-    res.status(500).json({ error: "Failed to fetch videos" });
-  }
-};
-
 export const handleGetDailyVotes: RequestHandler = async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const email = getEmailFromToken(token);
-
-    if (!email) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+    const email = getEmailFromToken(req.headers.authorization);
+    if (!email) return res.status(401).json({ error: "Unauthorized" });
 
     const userData = await getUserByEmail(email);
-
-    if (!userData) {
-      res.status(401).json({ error: "User not found" });
-      return;
-    }
+    if (!userData) return res.status(401).json({ error: "User not found" });
 
     const dailyVotes = await getDailyVoteCount(email);
-    const remaining = Math.max(0, 10 - dailyVotes);
-
-    // Get total votes for this user (all time)
-    const totalVotes = userData.votes.length;
-    const votedToday = dailyVotes;
-    const remainingVotes = remaining;
-
     res.json({
-      remaining: remainingVotes,
-      voted: votedToday,
-      totalVotes,
+      remaining: Math.max(0, 10 - dailyVotes),
+      voted: dailyVotes,
+      totalVotes: userData.votes.length,
     });
   } catch (error) {
     console.error("Daily votes error:", error);
@@ -159,16 +83,13 @@ export const handleGetDailyVotes: RequestHandler = async (req, res) => {
 export const handleGetVideo: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // Buscar vídeo do banco de dados PostgreSQL
     const videoQuery = await executeQuery(
       'SELECT id, title, description, url, thumbnail, reward_min as "rewardMin", reward_max as "rewardMax", created_at as "createdAt", duration FROM videos WHERE id = $1',
       [id]
     );
 
     if (videoQuery.rows.length === 0) {
-      res.status(404).json({ error: "Video not found" });
-      return;
+      return res.status(404).json({ error: "Video not found" });
     }
 
     const video = videoQuery.rows[0];
@@ -186,177 +107,66 @@ export const handleGetVideo: RequestHandler = async (req, res) => {
 
 export const handleVote: RequestHandler = async (req, res) => {
   try {
-    console.log("[handleVote] Starting vote handler");
-    const token = req.headers.authorization;
-    console.log("[handleVote] Token header present:", !!token);
-    const email = getEmailFromToken(token);
-
-    if (!email) {
-      console.warn("[handleVote] No valid email from token");
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+    const email = getEmailFromToken(req.headers.authorization);
+    if (!email) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
     const { voteType } = req.body;
 
-    console.log(
-      "[handleVote] Video ID:",
-      id,
-      "Vote type:",
-      voteType,
-      "Email:",
-      email,
-    );
-
     if (!voteType || !["like", "dislike"].includes(voteType)) {
-      res.status(400).json({ error: "Invalid vote type" });
-      return;
+      return res.status(400).json({ error: "Invalid vote type" });
     }
 
-    // Buscar vídeo do banco de dados PostgreSQL
-    const videoQuery = await executeQuery(
-      'SELECT id, title, description, url, thumbnail, reward_min, reward_max, duration FROM videos WHERE id = $1',
-      [id]
-    );
-
+    const videoQuery = await executeQuery('SELECT * FROM videos WHERE id = $1', [id]);
     if (videoQuery.rows.length === 0) {
-      res.status(404).json({ error: "Video not found" });
-      return;
+      return res.status(404).json({ error: "Video not found" });
     }
-
     const video = videoQuery.rows[0];
 
-    console.log("[handleVote] Attempting to get user by email:", email);
     let userData = await getUserByEmail(email);
+    if (!userData) return res.status(404).json({ error: "User not found" });
 
-    // User should exist at this point (already logged in)
-    if (!userData) {
-      console.error(
-        "[handleVote] User not found in database for email:",
-        email,
-      );
-      console.error(
-        "[handleVote] This likely means: 1) Database connection failed, 2) User was not created, or 3) Email format mismatch",
-      );
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-
-    console.log(
-      "[handleVote] User found:",
-      userData.profile.email,
-      "Balance:",
-      userData.profile.balance,
-    );
-
-    const user = userData.profile;
-    const now = new Date();
-    const nowISO = now.toISOString();
-
-    // Calculate hours since last reset
-    const lastReset = user.lastVoteDateReset
-      ? new Date(user.lastVoteDateReset)
-      : null;
-    const hoursSinceReset = lastReset
-      ? (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60)
-      : 24;
-
-    // Check if this is the first vote ever
-    const isFirstVoteEver = !user.votingDaysCount || user.votingDaysCount === 0;
-
-    if (isFirstVoteEver) {
-      // Initialize on first vote
-      user.votingDaysCount = 1;
-      user.lastVoteDateReset = now.toISOString();
-    } else if (hoursSinceReset >= 24) {
-      // Reset daily votes and increment voting days
-      user.lastVoteDateReset = now.toISOString();
-      user.votingDaysCount = (user.votingDaysCount || 0) + 1;
-    }
-
-    // Check daily vote limit (10 votes per day)
     const dailyVotes = await getDailyVoteCount(email);
     if (dailyVotes >= 10) {
-      res.status(400).json({
-        error: "You've reached your daily vote limit (10 votes)",
-        dailyVotesRemaining: 0,
-      });
-      return;
+      return res.status(400).json({ error: "You've reached your daily vote limit (10 votes)" });
     }
 
-    // Set firstEarnAt if not set
-    if (!user.firstEarnAt) {
-      user.firstEarnAt = now.toISOString();
-    }
-
-    // Generate random reward based on video's reward_min and reward_max
     const rewardMin = parseFloat(video.reward_min);
     const rewardMax = parseFloat(video.reward_max);
-    
-    console.log(`[Video Vote] Video ID: ${id}, Reward range: ${rewardMin} - ${rewardMax}`);
-    
-    const reward = roundToTwoDecimals(
-      Math.random() * (rewardMax - rewardMin) + rewardMin
-    );
-    
-    console.log(`[Video Vote] Generated reward: ${reward}`);
+    const reward = roundToTwoDecimals(Math.random() * (rewardMax - rewardMin) + rewardMin);
 
-    // Create vote record
-    const voteId = generateId();
     const vote = {
-      id: voteId,
-      userId: user.id,
+      id: generateId(),
+      userId: userData.profile.id,
       videoId: video.id,
       voteType: voteType as "like" | "dislike",
       rewardAmount: reward,
-      createdAt: now.toISOString(),
+      createdAt: new Date().toISOString(),
     };
-
-    // Add vote to user data
     await addVote(email, vote);
 
-    // Update user profile
-    user.lastVotedAt = nowISO;
+    const newBalance = roundToTwoDecimals(userData.profile.balance + reward);
+    userData.profile.balance = newBalance;
+    userData.profile.lastVotedAt = new Date().toISOString();
+    await updateUserProfile(email, userData.profile);
 
-    // Update voting streak (based on voting days, not calendar days)
-    if (!user.votingStreak) {
-      user.votingStreak = 1;
-    } else if (hoursSinceReset >= 24) {
-      // New voting period, increment streak
-      user.votingStreak = (user.votingStreak || 0) + 1;
-    }
-
-    // Update user balance
-    const newBalance = roundToTwoDecimals(user.balance + reward);
-    user.balance = newBalance;
-
-    // Update profile in database
-    await updateUserProfile(email, user);
-
-    // Create transaction record
-    const transactionId = generateId();
     const transaction = {
-      id: transactionId,
+      id: generateId(),
       type: "credit" as const,
       amount: reward,
       description: `Video vote reward - ${video.title}`,
       status: "completed" as const,
-      createdAt: nowISO,
+      createdAt: new Date().toISOString(),
     };
-
-    // Add transaction
     await addTransaction(email, transaction);
-
-    const dailyVotesRemaining = 10 - (dailyVotes + 1);
 
     const response: VoteResponse = {
       vote,
       newBalance,
-      dailyVotesRemaining,
+      dailyVotesRemaining: 10 - (dailyVotes + 1),
       rewardAmount: reward,
-      votingStreak: user.votingStreak || 0,
-      votingDaysCount: user.votingDaysCount || 0,
+      votingStreak: userData.profile.votingStreak || 0,
+      votingDaysCount: userData.profile.votingDaysCount || 0,
     };
 
     res.json(response);
