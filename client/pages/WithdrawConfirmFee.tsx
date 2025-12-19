@@ -15,7 +15,7 @@ export default function WithdrawConfirmFee() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
-  const feeAmount = 105.33;
+  const feeAmount = 19.87;
 
   // Função para atualizar os dados do usuário após o saque
   const updateUserBalance = async () => {
