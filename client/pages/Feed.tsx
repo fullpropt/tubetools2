@@ -285,8 +285,9 @@ export default function Feed() {
           setUser(updatedUser);
         }
 
-        // Recarregar dados de votos diários do servidor para manter sincronizado
-        await loadDailyVotesOnly();
+        // Atualizar votos diários localmente com dados da resposta
+        setDailyVotesRemaining(response.dailyVotesRemaining || 0);
+        setTotalVideosWatched((prev) => prev + 1);
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -338,7 +339,6 @@ export default function Feed() {
       displayedVideos,
       allVideos,
       user,
-      loadDailyVotesOnly,
     ],
   );
 
