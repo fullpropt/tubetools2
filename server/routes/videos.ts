@@ -1,4 +1,3 @@
-# Corrigido: server/routes/videos.ts
 import { RequestHandler } from "express";
 import { getAdvertisementVideos } from '../services/youtube-service';
 import { executeQuery } from "../db-postgres";
@@ -6,7 +5,6 @@ import { getUserByEmail, addVote, addTransaction, getDailyVoteCount, generateId 
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
 
-// ######### FUNÇÃO UNIFICADA E CORRIGIDA #########
 export const handleGetVideos: RequestHandler = async (req, res) => {
   try {
     // 1. Tenta buscar vídeos da API do YouTube
@@ -38,8 +36,6 @@ export const handleGetVideos: RequestHandler = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch videos" });
   }
 };
-
-// ######### RESTANTE DO CÓDIGO ORIGINAL #########
 
 function getEmailFromToken(token: string | undefined): string | null {
   if (!token) {
