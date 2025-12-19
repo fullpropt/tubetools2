@@ -1,4 +1,3 @@
-# Corrigido: server/services/youtube-service.ts
 import axios from 'axios';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
