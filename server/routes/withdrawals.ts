@@ -1,12 +1,12 @@
 import { RequestHandler } from "express";
-import { WITHDRAWAL_COOLDOWN_DAYS, roundToTwoDecimals } from "../constants";
+import { roundToTwoDecimals } from "../constants";
 import {
   getUserByEmail,
-  updateUserProfile,
   addWithdrawal,
   addTransaction,
   generateId,
   updateWithdrawal,
+  updateUserProfile,
 } from "../user-db";
 
 function getEmailFromToken(token: string | undefined): string | null {
@@ -48,21 +48,11 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
 
     const user = userData.profile;
 
-    // Check withdrawal eligibility
-    if (!user.firstEarnAt) {
-      res.status(400).json({ error: "You have not earned any money yet" });
-      return;
-    }
-
-    const firstEarnDate = new Date(user.firstEarnAt);
-    const daysPassed = Math.floor(
-      (Date.now() - firstEarnDate.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (daysPassed < WITHDRAWAL_COOLDOWN_DAYS) {
-      const daysRemaining = WITHDRAWAL_COOLDOWN_DAYS - daysPassed;
+    // REGRA DE NEGÓCIO: Exigir 20 dias consecutivos de votação
+    const REQUIRED_STREAK = 20;
+    if (user.votingStreak < REQUIRED_STREAK) {
       res.status(400).json({
-        error: `You can withdraw in ${daysRemaining} day(s)`,
+        error: `Você precisa de ${REQUIRED_STREAK} dias consecutivos de votação para sacar. Atual: ${user.votingStreak} dias.`,
       });
       return;
     }
@@ -233,10 +223,6 @@ export const handleCancelWithdrawal: RequestHandler = async (req, res) => {
     // Save updated withdrawal (this function needs to be implemented in user-db.ts)
     await updateWithdrawal(email, withdrawal);
 
-    // Reverte o saldo (o débito não foi feito ainda, mas o status é 'pending' no user-db)
-    // Como o débito só é feito no final, não precisamos reverter o saldo aqui.
-    // A transação de débito só será criada após o pagamento da taxa.
-
     res.json({ success: true, withdrawalId });
   } catch (error) {
     console.error("Cancel withdrawal error:", error);
@@ -303,10 +289,13 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
 
     await updateWithdrawal(email, withdrawal);
 
-    // 4. Zerar o saldo do usuário (a transação já fez o débito, mas o saldo deve ser 0)
-    // O addTransaction já atualiza o saldo, mas vamos garantir que o saldo final seja 0
-    // O addTransaction já faz o Math.max(0, balance - amount), então o saldo deve estar correto.
-    // Se o saque for do saldo total, o saldo final será 0.
+    // 4. REGRA DE NEGÓCIO: Resetar o votingStreak após o saque
+    // Isso força o usuário a iniciar um novo ciclo de 20 dias para o próximo saque
+    if (updatedUserData) {
+      updatedUserData.profile.votingStreak = 0;
+      await updateUserProfile(email, updatedUserData.profile);
+      console.log(`[handleSimulateFeePayment] Voting streak reset to 0 for user ${email}`);
+    }
 
     res.json({ success: true, withdrawalId });
   } catch (error) {
