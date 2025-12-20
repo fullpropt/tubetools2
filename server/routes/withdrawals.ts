@@ -59,8 +59,10 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
     }
 
     // Check if user has a pending withdrawal
+    // Only "pending" status should block new withdrawals
+    // Cancelled, completed, and rejected withdrawals should not block
     const pendingWithdrawal = userData.withdrawals.find(
-      (w) => w.status === "pending" || w.status === "cancelled",
+      (w) => w.status === "pending"
     );
 
     if (pendingWithdrawal) {
