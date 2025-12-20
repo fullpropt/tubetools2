@@ -8,15 +8,27 @@ import {
 } from "@/lib/auth";
 import { apiPost } from "@/lib/api-client";
 import { AuthResponse, SignupRequest, LoginRequest } from "@shared/api";
-import { Play, CheckCircle2 } from "lucide-react";
+import { Play, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Password validation
+  const passwordRequirements = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+
+  const isPasswordValid = Object.values(passwordRequirements).every(Boolean);
 
   useEffect(() => {
     // Check for remembered email and auto-fill
@@ -33,9 +45,15 @@ export default function Onboarding() {
     setLoading(true);
 
     try {
+      if (!isPasswordValid) {
+        setError("Password does not meet requirements");
+        setLoading(false);
+        return;
+      }
+
       const normalizedEmail = email.toLowerCase().trim();
-      const payload: SignupRequest = { name, email: normalizedEmail };
-      console.log("Sending signup request with payload:", payload);
+      const payload: SignupRequest = { name, email: normalizedEmail, password };
+      console.log("Sending signup request with payload:", { ...payload, password: "***" });
 
       const response = await apiPost<AuthResponse>("/api/auth/signup", payload);
       console.log("Signup response received:", response);
@@ -66,8 +84,8 @@ export default function Onboarding() {
 
     try {
       const normalizedEmail = email.toLowerCase().trim();
-      const payload: LoginRequest = { email: normalizedEmail };
-      console.log("Sending login request with payload:", payload);
+      const payload: LoginRequest = { email: normalizedEmail, password };
+      console.log("Sending login request with payload:", { email: normalizedEmail, password: "***" });
       const response = await apiPost<AuthResponse>("/api/auth/login", payload);
 
       setUser(response.user);
@@ -177,6 +195,60 @@ export default function Onboarding() {
             )}
           </div>
 
+          <div>
+            <label className="block text-sm font-semibold mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === "signup" ? "Create a strong password" : "Enter your password"}
+                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {/* Password Requirements - Only show in signup mode */}
+            {mode === "signup" && password && (
+              <div className="mt-3 space-y-2 p-3 rounded-lg bg-muted/50">
+                <p className="text-xs font-semibold text-foreground">Password must contain:</p>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${passwordRequirements.length ? "bg-green-600" : "bg-gray-300"}`} />
+                    <span className={`text-xs ${passwordRequirements.length ? "text-green-700" : "text-gray-500"}`}>
+                      At least 8 characters
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${passwordRequirements.uppercase ? "bg-green-600" : "bg-gray-300"}`} />
+                    <span className={`text-xs ${passwordRequirements.uppercase ? "text-green-700" : "text-gray-500"}`}>
+                      One uppercase letter
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${passwordRequirements.lowercase ? "bg-green-600" : "bg-gray-300"}`} />
+                    <span className={`text-xs ${passwordRequirements.lowercase ? "text-green-700" : "text-gray-500"}`}>
+                      One lowercase letter
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${passwordRequirements.number ? "bg-green-600" : "bg-gray-300"}`} />
+                    <span className={`text-xs ${passwordRequirements.number ? "text-green-700" : "text-gray-500"}`}>
+                      One number
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {error && (
             <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               {error}
@@ -185,8 +257,8 @@ export default function Onboarding() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+            disabled={loading || (mode === "signup" && !isPasswordValid)}
+            className="w-full px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? "Loading..."
@@ -209,6 +281,8 @@ export default function Onboarding() {
             onClick={() => {
               setMode(mode === "signup" ? "login" : "signup");
               setName("");
+              setPassword("");
+              setShowPassword(false);
               setError("");
             }}
             className="w-full btn-outline"
