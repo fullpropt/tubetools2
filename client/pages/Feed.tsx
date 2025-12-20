@@ -273,14 +273,22 @@ export default function Feed() {
         });
 
         setVotedVideos((prev) => new Set([...prev, videoId]));
-        // Usar os valores retornados pelo servidor (que já incluem os contadores do BD)
         setDailyVotesRemaining(response.dailyVotesRemaining || 0);
         setTotalVideosWatched(response.totalVideosWatched || 0);
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
 
-        // Don't update balance here - let loadUserStats() fetch from server
-        // This prevents duplicate balance updates
+        // Atualizar o saldo imediatamente com o valor retornado pelo servidor
+        if (response.newBalance !== undefined) {
+          const currentUser = getUser();
+          if (currentUser) {
+            const updatedUser = {
+              ...currentUser,
+              balance: response.newBalance,
+            };
+            setUser(updatedUser);
+          }
+        }
 
         // Add money animation
         const rect = (event.target as HTMLElement).getBoundingClientRect();
