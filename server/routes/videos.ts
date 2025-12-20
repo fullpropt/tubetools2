@@ -140,7 +140,7 @@ export const handleVote: RequestHandler = async (req, res) => {
     }
 
     const videoQuery = await executeQuery('SELECT * FROM videos WHERE id = $1', [id]);
-    let rewardMin = 2.0, rewardMax = 8.0, videoTitle = "YouTube Video";
+    let rewardMin = 15.0, rewardMax = 27.0, videoTitle = "YouTube Video";
 
     if (videoQuery.rows.length > 0) {
       const video = videoQuery.rows[0];

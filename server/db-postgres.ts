@@ -85,9 +85,11 @@ export async function executeSingleQuery(sql: string, params: any[] = []) {
 
 export async function seedVideos() {
   const getVideoReward = () => {
-    const MIN_REWARD = 4.44;
-    const MAX_REWARD = 8.33;
+    const MIN_REWARD = 15.00;
+    const MAX_REWARD = 27.00;
+    // Generate random min between 15 and 21 (70% of range)
     const min = Math.round((Math.random() * (MAX_REWARD * 0.7 - MIN_REWARD) + MIN_REWARD) * 100) / 100;
+    // Generate random max between min and 27
     const max = Math.round((Math.random() * (MAX_REWARD - min) + min) * 100) / 100;
     return { min, max };
   };
