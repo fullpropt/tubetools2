@@ -220,6 +220,30 @@ export async function getUserByEmail(email: string): Promise<UserData | null> {
   return loadUserData(email);
 }
 
+export async function getUserByEmailWithPassword(email: string): Promise<{ user: UserData; passwordHash: string | null } | null> {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await executeSingleQuery(
+      "SELECT * FROM users WHERE email = $1",
+      [normalizedEmail],
+    );
+    if (!user) {
+      return null;
+    }
+    const userData = await loadUserData(normalizedEmail);
+    if (!userData) {
+      return null;
+    }
+    return {
+      user: userData,
+      passwordHash: user.password_hash || null,
+    };
+  } catch (err) {
+    console.error(`Could not get user by email: ${email}`, err);
+    return null;
+  }
+}
+
 export async function updateUserProfile(
   email: string,
   profile: UserProfile,
