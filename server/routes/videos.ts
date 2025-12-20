@@ -5,7 +5,24 @@ import { getUserByEmail, addVote, addTransaction, generateId, updateUserProfile 
 import { roundToTwoDecimals } from "../constants";
 import { VoteResponse } from "@shared/api";
 
-// ... (handleGetVideos e outras funções permanecem as mesmas)
+function getEmailFromToken(token: string | undefined): string | null {
+  if (!token) {
+    console.warn("[Videos] No authorization token provided");
+    return null;
+  }
+  try {
+    let tokenValue = token.startsWith("Bearer ") ? token.slice(7) : token;
+    const email = Buffer.from(tokenValue, "base64").toString("utf-8").trim();
+    if (!email) {
+      console.warn("[Videos] Email is empty after decoding");
+      return null;
+    }
+    return email;
+  } catch (err) {
+    console.error("[Videos] Error decoding token:", err);
+    return null;
+  }
+}
 
 async function resetDailyCountersIfNeeded(user: any) {
   const now = new Date();
@@ -18,11 +35,87 @@ async function resetDailyCountersIfNeeded(user: any) {
       [user.id]
     );
     console.log(`[resetDailyCountersIfNeeded] Daily counters reset for user ${user.email}`);
-    // Recarregar dados do usuário após o reset
     return await executeSingleQuery("SELECT * FROM users WHERE id = $1", [user.id]);
   }
   return user;
 }
+
+export const handleGetVideos: RequestHandler = async (req, res) => {
+  try {
+    let videos = await getAdvertisementVideos();
+
+    if (!videos || videos.length === 0) {
+      console.log('[Videos] YouTube API failed or returned no videos. Falling back to database.');
+      const dbVideos = await executeQuery(
+        `SELECT id, title, description, url, thumbnail, 
+                reward_min as "rewardMin", reward_max as "rewardMax", 
+                created_at as "createdAt", duration 
+         FROM videos 
+         ORDER BY RANDOM()`
+      );
+
+      videos = dbVideos.rows.map((video: any) => ({
+        ...video,
+        rewardMin: parseFloat(video.rewardMin) || 0,
+        rewardMax: parseFloat(video.rewardMax) || 0,
+        duration: video.duration || 180,
+      }));
+    }
+
+    console.log(`[Videos] Loaded ${videos.length} advertisement videos.`);
+    res.json(videos);
+  } catch (error) {
+    console.error("[Videos] Error fetching videos:", error);
+    res.status(500).json({ error: "Failed to fetch videos" });
+  }
+};
+
+export const handleGetVideo: RequestHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const videoQuery = await executeQuery(
+      'SELECT id, title, description, url, thumbnail, reward_min as "rewardMin", reward_max as "rewardMax", created_at as "createdAt", duration FROM videos WHERE id = $1',
+      [id]
+    );
+
+    if (videoQuery.rows.length === 0) {
+      return res.status(404).json({ error: "Video not found" });
+    }
+
+    const video = videoQuery.rows[0];
+    res.json({
+      ...video,
+      rewardMin: parseFloat(video.rewardMin) || 0,
+      rewardMax: parseFloat(video.rewardMax) || 0,
+      duration: video.duration || 180,
+    });
+  } catch (error) {
+    console.error("Video error:", error);
+    res.status(500).json({ error: "Failed to fetch video" });
+  }
+};
+
+export const handleGetDailyVotes: RequestHandler = async (req, res) => {
+  try {
+    const email = getEmailFromToken(req.headers.authorization);
+    if (!email) return res.status(401).json({ error: "Unauthorized" });
+
+    let user = await executeSingleQuery("SELECT * FROM users WHERE email = $1", [email]);
+    if (!user) return res.status(401).json({ error: "User not found" });
+
+    // Resetar contadores diários se necessário
+    user = await resetDailyCountersIfNeeded(user);
+
+    res.json({
+      remaining: user.daily_votes_left || 0,
+      voted: 10 - (user.daily_votes_left || 0),
+      totalVotes: user.daily_videos_watched || 0,
+    });
+  } catch (error) {
+    console.error("Daily votes error:", error);
+    res.status(500).json({ error: "Failed to fetch daily votes" });
+  }
+};
 
 export const handleVote: RequestHandler = async (req, res) => {
   try {
@@ -55,11 +148,15 @@ export const handleVote: RequestHandler = async (req, res) => {
       rewardMax = parseFloat(video.reward_max);
       videoTitle = video.title;
     } else {
+      console.log(`[Vote] Video ${id} not found in DB, fetching details from YouTube API...`);
       const youtubeVideo = await getVideoDetails(id);
       if (youtubeVideo) {
         rewardMin = youtubeVideo.rewardMin;
         rewardMax = youtubeVideo.rewardMax;
         videoTitle = youtubeVideo.title;
+        console.log(`[Vote] Fetched YouTube video details. Reward range: ${rewardMin} - ${rewardMax}`);
+      } else {
+        console.warn(`[Vote] Could not fetch details for video ${id}. Using default rewards.`);
       }
     }
 
@@ -80,7 +177,7 @@ export const handleVote: RequestHandler = async (req, res) => {
       rewardAmount: reward,
       createdAt: new Date().toISOString(),
     };
-    await addVote(email, vote); // A função addVote agora só insere o voto
+    await addVote(email, vote);
 
     const transaction = {
       id: generateId(),
@@ -90,7 +187,7 @@ export const handleVote: RequestHandler = async (req, res) => {
       status: "completed" as const,
       createdAt: new Date().toISOString(),
     };
-    await addTransaction(email, transaction); // addTransaction agora só insere a transação
+    await addTransaction(email, transaction);
 
     const updatedUser = await executeSingleQuery("SELECT * FROM users WHERE id = $1", [user.id]);
 
