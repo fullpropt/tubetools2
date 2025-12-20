@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { roundToTwoDecimals } from "../constants";
+import { executeQuery } from "../db-postgres";
 import {
   getUserByEmail,
   addWithdrawal,
@@ -273,7 +274,17 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
     const amountToWithdraw = withdrawal.amount;
     console.log(`[handleSimulateFeePayment] Saldo antes: ${user.balance}, Valor do saque: ${amountToWithdraw}`);
 
-    // 2. Criar transação de débito (saque)
+    // 2. Descontar o saldo diretamente no banco de dados
+    const newBalance = roundToTwoDecimals(Math.max(0, user.balance - amountToWithdraw));
+    
+    await executeQuery(
+      "UPDATE users SET balance = $1 WHERE id = $2",
+      [newBalance, user.id]
+    );
+    
+    console.log(`[handleSimulateFeePayment] Saldo após desconto: ${newBalance}`);
+
+    // 3. Criar transação de débito (saque)
     const transactionId = generateId();
     const transaction = {
       id: transactionId,
@@ -285,19 +296,16 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
     };
 
     await addTransaction(email, transaction);
-    
-    // Verificar saldo após a transação
-    const updatedUserData = await getUserByEmail(email);
-    console.log(`[handleSimulateFeePayment] Saldo após transação: ${updatedUserData?.profile.balance}`);
 
-    // 3. Atualizar status do saque para completed
+    // 4. Atualizar status do saque para completed
     withdrawal.status = "completed";
     withdrawal.completedAt = new Date().toISOString();
 
     await updateWithdrawal(email, withdrawal);
 
-    // 4. REGRA DE NEGÓCIO: Resetar o votingStreak após o saque
+    // 5. REGRA DE NEGÓCIO: Resetar o votingStreak após o saque
     // Isso força o usuário a iniciar um novo ciclo de 20 dias para o próximo saque
+    const updatedUserData = await getUserByEmail(email);
     if (updatedUserData) {
       updatedUserData.profile.votingStreak = 0;
       await updateUserProfile(email, updatedUserData.profile);
