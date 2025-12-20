@@ -67,8 +67,9 @@ export default function ChangePassword() {
         navigate("/profile");
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to change password");
-    } finally {
+      const errorMessage = err instanceof Error ? err.message : "Failed to change password";
+      console.error("Change password error:", err);
+      setError(errorMessage);    } finally {
       setLoading(false);
     }
   };

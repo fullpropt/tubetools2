@@ -206,7 +206,7 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
     );
 
     console.log(`Password changed for user: ${trimmedEmail}`);
-    res.json({ success: true, message: "Password changed successfully" });
+    res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (error) {
     console.error("Change password error:", error);
     res.status(500).json({ error: "Failed to change password" });

@@ -80,7 +80,10 @@ export async function apiCall<T>(
       return JSON.parse(text) as T;
     } catch (parseErr) {
       console.error("Failed to parse JSON:", text.substring(0, 100));
-      throw new Error("Invalid response format");
+      console.error("Response status:", response.status);
+      console.error("Response headers:", response.headers);
+      console.error("Full response text:", text);
+      throw new Error(`Invalid response format: ${text.substring(0, 100)}`);
     }
   } catch (err) {
     // Handle network-level errors
