@@ -143,10 +143,16 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
 export const handleChangePassword: RequestHandler = async (req, res) => {
   try {
+    console.log("[handleChangePassword] Starting password change request");
+    
     const token = req.headers.authorization;
+    console.log("[handleChangePassword] Token present:", !!token);
+    
     const email = token ? Buffer.from(token.replace("Bearer ", ""), "base64").toString() : null;
+    console.log("[handleChangePassword] Email extracted:", email);
 
     if (!email) {
+      console.warn("[handleChangePassword] No email found in token");
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
@@ -154,18 +160,22 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
     const { currentPassword, newPassword } = req.body as ChangePasswordRequest;
 
     if (!currentPassword || typeof currentPassword !== "string") {
+      console.warn("[handleChangePassword] Current password missing or invalid");
       res.status(400).json({ error: "Current password is required" });
       return;
     }
 
     if (!newPassword || typeof newPassword !== "string") {
+      console.warn("[handleChangePassword] New password missing or invalid");
       res.status(400).json({ error: "New password is required" });
       return;
     }
 
     // Validate new password strength
+    console.log("[handleChangePassword] Validating new password strength");
     const passwordValidation = validatePasswordStrength(newPassword);
     if (!passwordValidation.isValid) {
+      console.warn("[handleChangePassword] Password validation failed:", passwordValidation.errors);
       res.status(400).json({ 
         error: "New password does not meet requirements",
         details: passwordValidation.errors 
@@ -174,41 +184,62 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+    console.log("[handleChangePassword] Fetching user by email:", trimmedEmail);
+    
     const userWithPassword = await getUserByEmailWithPassword(trimmedEmail);
 
     if (!userWithPassword) {
+      console.warn("[handleChangePassword] User not found:", trimmedEmail);
       res.status(404).json({ error: "User not found" });
       return;
     }
 
     const { user: userData, passwordHash } = userWithPassword;
+    console.log("[handleChangePassword] User found, password hash present:", !!passwordHash);
 
     // Verify current password
     if (!passwordHash) {
+      console.warn("[handleChangePassword] User has no password hash set");
       res.status(401).json({ error: "Current password is incorrect" });
       return;
     }
 
+    console.log("[handleChangePassword] Comparing passwords");
     const passwordMatch = await comparePassword(currentPassword, passwordHash);
     if (!passwordMatch) {
+      console.warn("[handleChangePassword] Password comparison failed");
       res.status(401).json({ error: "Current password is incorrect" });
       return;
     }
 
+    console.log("[handleChangePassword] Current password verified, hashing new password");
     // Hash new password
     const newPasswordHash = await hashPassword(newPassword);
+    console.log("[handleChangePassword] New password hashed successfully");
 
     // Update password in database
+    console.log("[handleChangePassword] Updating password in database");
     const { executeQuery } = await import("../db-postgres");
-    await executeQuery(
+    const result = await executeQuery(
       "UPDATE users SET password_hash = $1 WHERE email = $2",
       [newPasswordHash, trimmedEmail]
     );
+    console.log("[handleChangePassword] Database update result:", result);
 
-    console.log(`Password changed for user: ${trimmedEmail}`);
+    console.log(`[handleChangePassword] Password changed successfully for user: ${trimmedEmail}`);
     res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (error) {
-    console.error("Change password error:", error);
-    res.status(500).json({ error: "Failed to change password" });
+    console.error("[handleChangePassword] Unexpected error:", error);
+    console.error("[handleChangePassword] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("[handleChangePassword] Error message:", error instanceof Error ? error.message : String(error));
+    console.error("[handleChangePassword] Error stack:", error instanceof Error ? error.stack : "N/A");
+    
+    // Make sure we always return JSON
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: "Failed to change password", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
   }
 };
