@@ -27,11 +27,20 @@ function parseDuration(duration: string): number {
 }
 
 function calculateRewards(durationSeconds: number): { min: number; max: number } {
-  // Fixed reward range: $15-$27 (independent of duration)
-  // This provides consistent economics with ~5% withdrawal fee
-  const rewardMin = 15.00;
-  const rewardMax = 27.00;
-
+  // Normalize duration to 0.5-10 minute range for multiplier calculation
+  const durationMinutes = Math.min(10, Math.max(0.5, durationSeconds / 60));
+  
+  // Base rewards: average around $15-$27
+  const baseMin = 15.00;
+  const baseMax = 27.00;
+  
+  // Multiplier varies based on duration (0.5 to 1.5)
+  // This creates variation while keeping average in target range
+  const multiplier = 0.5 + (durationMinutes / 10) * 1.0;
+  
+  const rewardMin = parseFloat((baseMin * multiplier).toFixed(2));
+  const rewardMax = parseFloat((baseMax * multiplier).toFixed(2));
+  
   return { min: rewardMin, max: rewardMax };
 }
 
