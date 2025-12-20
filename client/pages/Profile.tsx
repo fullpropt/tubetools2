@@ -125,6 +125,24 @@ export default function Profile() {
     }
   };
 
+  const handleCancelPendingWithdrawal = async (withdrawalId?: string) => {
+    if (!withdrawalId) {
+      setError("Invalid withdrawal ID");
+      return;
+    }
+
+    try {
+      setError("");
+      await apiPost("/api/withdrawals/cancel", { withdrawalId });
+      setSuccessMessage("Withdrawal cancelled successfully");
+      setTimeout(() => {
+        loadBalance();
+      }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to cancel withdrawal");
+    }
+  };
+
   const handleNameUpdated = (newName: string) => {
     setUserName(newName);
     // Update user in localStorage
@@ -281,21 +299,37 @@ export default function Profile() {
               )}
 
               {balance.pendingWithdrawal && (
-                <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-200 text-sm flex gap-2">
-                  <Clock className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold">
-                      Withdrawal pending: $
-                      {(balance.pendingWithdrawal?.amount ? 
-                        (typeof balance.pendingWithdrawal.amount === "string"
-                          ? parseFloat(balance.pendingWithdrawal.amount)
-                          : balance.pendingWithdrawal.amount
-                        ) : 0
-                      ).toFixed(2)}
-                    </p>
-                    <p className="text-xs opacity-80">
-                      Your request is under review
-                    </p>
+                <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 space-y-3">
+                  <div className="flex gap-2">
+                    <Clock className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
+                    <div>
+                      <p className="font-semibold text-yellow-900 dark:text-yellow-200">
+                        Withdrawal pending: $
+                        {(balance.pendingWithdrawal?.amount ? 
+                          (typeof balance.pendingWithdrawal.amount === "string"
+                            ? parseFloat(balance.pendingWithdrawal.amount)
+                            : balance.pendingWithdrawal.amount
+                          ) : 0
+                        ).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-yellow-800 dark:text-yellow-300 opacity-80">
+                        Your request is under review
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => navigate(`/withdraw/confirm/${balance.pendingWithdrawal?.id}`)}
+                      className="flex-1 px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-semibold transition-colors text-sm"
+                    >
+                      Continue Withdrawal
+                    </button>
+                    <button
+                      onClick={() => handleCancelPendingWithdrawal(balance.pendingWithdrawal?.id)}
+                      className="flex-1 px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold transition-colors text-sm"
+                    >
+                      Cancel Withdrawal
+                    </button>
                   </div>
                 </div>
               )}
