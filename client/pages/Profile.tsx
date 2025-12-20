@@ -319,7 +319,7 @@ export default function Profile() {
                   </div>
                   <div className="flex gap-2 pt-2">
                     <button
-                      onClick={() => navigate(`/withdraw/confirm/${balance.pendingWithdrawal?.id}`)}
+                      onClick={() => navigate(`/withdraw/confirm-fee/${balance.pendingWithdrawal?.id}`)}
                       className="flex-1 px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-semibold transition-colors text-sm"
                     >
                       Continue Withdrawal
