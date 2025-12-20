@@ -291,19 +291,11 @@ export async function addTransaction(
       ],
     );
 
-    if (transaction.type === "credit") {
-      userData.profile.balance += transaction.amount;
-      console.log(`[addTransaction] Credit: ${transaction.amount}, New balance: ${userData.profile.balance}`);
-    } else if (transaction.type === "debit") {
-      const oldBalance = userData.profile.balance;
-      userData.profile.balance = Math.max(
-        0,
-        userData.profile.balance - transaction.amount,
-      );
-      console.log(`[addTransaction] Debit: ${transaction.amount}, Old balance: ${oldBalance}, New balance: ${userData.profile.balance}`);
-    }
+    // NOTE: Balance is updated separately in the vote handler (videos.ts).
+    // This function only records the transaction without modifying the balance.
+    // This prevents double-crediting or double-debiting of the balance.
+    console.log(`[addTransaction] ${transaction.type === "credit" ? "Credit" : "Debit"}: ${transaction.amount}, Transaction recorded`);
 
-    await saveUserData(email, userData);
     return await loadUserData(email);
   } catch (err) {
     console.error("Could not add transaction:", err);
