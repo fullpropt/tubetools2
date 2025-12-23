@@ -176,15 +176,16 @@ export async function createUser(
   name: string,
   email: string,
   initialBalance: number = 213.19,
+  passwordHash?: string,
 ): Promise<UserData> {
   const normalizedEmail = email.toLowerCase().trim();
   const now = new Date().toISOString();
 
   try {
     await executeQuery(
-      `INSERT INTO users (id, email, name, balance, created_at, voting_streak, voting_days_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [id, normalizedEmail, name.trim(), initialBalance, now, 0, 0],
+      `INSERT INTO users (id, email, name, balance, created_at, voting_streak, voting_days_count, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, normalizedEmail, name.trim(), initialBalance, now, 0, 0, passwordHash || null],
     );
 
     const profile: UserProfile = {
