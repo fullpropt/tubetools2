@@ -73,11 +73,11 @@ export default function ForgotPassword() {
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Voltar para login
+                  Back to login
                 </button>
-                <h2 className="text-xl font-bold mb-2">Esqueceu sua senha?</h2>
+                <h2 className="text-xl font-bold mb-2">Forgot your password?</h2>
                 <p className="text-sm text-muted-foreground">
-                  Digite seu email e enviaremos um link para redefinir sua senha.
+                  Enter your email and we'll send you a link to reset your password.
                 </p>
               </div>
 
@@ -88,7 +88,7 @@ export default function ForgotPassword() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
+                    placeholder="your@email.com"
                     className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                     disabled={loading}
@@ -106,7 +106,7 @@ export default function ForgotPassword() {
                   disabled={loading}
                   className="w-full px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Processando..." : "Enviar Link de Recuperação"}
+                  {loading ? "Processing..." : "Send Recovery Link"}
                 </button>
               </form>
             </>
@@ -128,22 +128,22 @@ export default function ForgotPassword() {
                 </svg>
               </div>
               
-              <h3 className="text-lg font-bold">Email Enviado!</h3>
+              <h3 className="text-lg font-bold">Email Sent!</h3>
               
               <p className="text-sm text-muted-foreground">
-                Se existe uma conta com o email <strong>{email}</strong>, você receberá um link para redefinir sua senha.
+                If an account exists with <strong>{email}</strong>, you will receive a link to reset your password.
               </p>
 
               {resetToken && (
                 <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-xs text-yellow-800 mb-3">
-                    <strong>Modo de Desenvolvimento:</strong> Em produção, você receberia um email. Por enquanto, use o botão abaixo:
+                    <strong>Development Mode:</strong> In production, you would receive an email. For now, use the button below:
                   </p>
                   <button
                     onClick={handleGoToReset}
                     className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-semibold"
                   >
-                    Ir para Redefinição de Senha
+                    Go to Password Reset
                   </button>
                 </div>
               )}
@@ -152,7 +152,7 @@ export default function ForgotPassword() {
                 onClick={() => navigate("/onboarding")}
                 className="w-full btn-outline mt-4"
               >
-                Voltar para Login
+                Back to Login
               </button>
             </div>
           )}
@@ -160,12 +160,12 @@ export default function ForgotPassword() {
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Lembrou sua senha?{" "}
+          Remember your password?{" "}
           <button
             onClick={() => navigate("/onboarding")}
             className="text-red-600 hover:underline font-semibold"
           >
-            Fazer login
+            Sign in
           </button>
         </p>
       </div>

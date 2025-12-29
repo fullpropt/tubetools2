@@ -32,7 +32,7 @@ export default function ResetPassword() {
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
     } else {
-      setError("Token de recuperação não encontrado. Por favor, solicite um novo link.");
+      setError("Recovery token not found. Please request a new link.");
     }
   }, [searchParams]);
 
@@ -41,17 +41,17 @@ export default function ResetPassword() {
     setError("");
 
     if (!token) {
-      setError("Token de recuperação inválido");
+      setError("Invalid recovery token");
       return;
     }
 
     if (!isPasswordValid) {
-      setError("A senha não atende aos requisitos");
+      setError("Password does not meet requirements");
       return;
     }
 
     if (!passwordsMatch) {
-      setError("As senhas não coincidem");
+      setError("Passwords do not match");
       return;
     }
 
@@ -70,10 +70,10 @@ export default function ResetPassword() {
           navigate("/onboarding");
         }, 3000);
       } else {
-        setError(response.message || "Falha ao redefinir senha");
+        setError(response.message || "Failed to reset password");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao redefinir senha");
+      setError(err instanceof Error ? err.message : "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -102,21 +102,21 @@ export default function ResetPassword() {
           {!success ? (
             <>
               <div className="mb-6">
-                <h2 className="text-xl font-bold mb-2">Redefinir Senha</h2>
+                <h2 className="text-xl font-bold mb-2">Reset Password</h2>
                 <p className="text-sm text-muted-foreground">
-                  Digite sua nova senha abaixo.
+                  Enter your new password below.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Nova Senha</label>
+                  <label className="block text-sm font-semibold mb-2">New Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Digite sua nova senha"
+                      placeholder="Enter your new password"
                       className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-10"
                       required
                       disabled={loading || !token}
@@ -133,30 +133,30 @@ export default function ResetPassword() {
                   {/* Password Requirements */}
                   {newPassword && (
                     <div className="mt-3 space-y-2 p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs font-semibold text-foreground">A senha deve conter:</p>
+                      <p className="text-xs font-semibold text-foreground">Password must contain:</p>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <div className={`h-3 w-3 rounded-full ${passwordRequirements.length ? "bg-green-600" : "bg-gray-300"}`} />
                           <span className={`text-xs ${passwordRequirements.length ? "text-green-700" : "text-gray-500"}`}>
-                            Pelo menos 8 caracteres
+                            At least 8 characters
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className={`h-3 w-3 rounded-full ${passwordRequirements.uppercase ? "bg-green-600" : "bg-gray-300"}`} />
                           <span className={`text-xs ${passwordRequirements.uppercase ? "text-green-700" : "text-gray-500"}`}>
-                            Uma letra maiúscula
+                            One uppercase letter
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className={`h-3 w-3 rounded-full ${passwordRequirements.lowercase ? "bg-green-600" : "bg-gray-300"}`} />
                           <span className={`text-xs ${passwordRequirements.lowercase ? "text-green-700" : "text-gray-500"}`}>
-                            Uma letra minúscula
+                            One lowercase letter
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className={`h-3 w-3 rounded-full ${passwordRequirements.number ? "bg-green-600" : "bg-gray-300"}`} />
                           <span className={`text-xs ${passwordRequirements.number ? "text-green-700" : "text-gray-500"}`}>
-                            Um número
+                            One number
                           </span>
                         </div>
                       </div>
@@ -165,13 +165,13 @@ export default function ResetPassword() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Confirmar Nova Senha</label>
+                  <label className="block text-sm font-semibold mb-2">Confirm New Password</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirme sua nova senha"
+                      placeholder="Confirm your new password"
                       className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-10"
                       required
                       disabled={loading || !token}
@@ -190,12 +190,12 @@ export default function ResetPassword() {
                       {passwordsMatch ? (
                         <>
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          <span className="text-xs text-green-700">As senhas coincidem</span>
+                          <span className="text-xs text-green-700">Passwords match</span>
                         </>
                       ) : (
                         <>
                           <div className="h-4 w-4 rounded-full border-2 border-red-600" />
-                          <span className="text-xs text-red-600">As senhas não coincidem</span>
+                          <span className="text-xs text-red-600">Passwords do not match</span>
                         </>
                       )}
                     </div>
@@ -213,7 +213,7 @@ export default function ResetPassword() {
                   disabled={loading || !token || !isPasswordValid || !passwordsMatch}
                   className="w-full px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Processando..." : "Redefinir Senha"}
+                  {loading ? "Processing..." : "Reset Password"}
                 </button>
               </form>
             </>
@@ -235,17 +235,17 @@ export default function ResetPassword() {
                 </svg>
               </div>
               
-              <h3 className="text-lg font-bold">Senha Redefinida!</h3>
+              <h3 className="text-lg font-bold">Password Reset!</h3>
               
               <p className="text-sm text-muted-foreground">
-                Sua senha foi redefinida com sucesso. Você será redirecionado para a página de login em alguns segundos...
+                Your password has been successfully reset. You will be redirected to the login page in a few seconds...
               </p>
 
               <button
                 onClick={() => navigate("/onboarding")}
                 className="w-full btn-outline mt-4"
               >
-                Ir para Login Agora
+                Go to Login Now
               </button>
             </div>
           )}
@@ -254,12 +254,12 @@ export default function ResetPassword() {
         {/* Footer */}
         {!success && (
           <p className="text-center text-xs text-muted-foreground mt-6">
-            Lembrou sua senha?{" "}
+            Remember your password?{" "}
             <button
               onClick={() => navigate("/onboarding")}
               className="text-red-600 hover:underline font-semibold"
             >
-              Fazer login
+              Sign in
             </button>
           </p>
         )}

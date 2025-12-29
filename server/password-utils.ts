@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const SALT_ROUNDS = 10;
 
@@ -74,6 +75,5 @@ export function validatePasswordStrength(password: string): {
  * @returns Random token string
  */
 export function generateResetToken(): string {
-  const crypto = require('crypto');
   return crypto.randomBytes(32).toString('hex');
 }

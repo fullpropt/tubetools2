@@ -204,7 +204,7 @@ export default function Onboarding() {
                   onClick={() => navigate("/forgot-password")}
                   className="text-xs text-red-600 hover:underline font-semibold"
                 >
-                  Esqueceu a senha?
+                  Forgot password?
                 </button>
               )}
             </div>
