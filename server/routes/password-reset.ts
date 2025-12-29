@@ -30,9 +30,11 @@ async function sendPasswordResetEmail(email: string, resetToken: string): Promis
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email,
-        resetToken: resetToken,
-        appName: 'TubeTools'
+        json: {
+          email: email,
+          resetToken: resetToken,
+          appName: 'TubeTools'
+        }
       })
     });
 
