@@ -512,3 +512,92 @@ export async function getVotedVideoIds(email: string): Promise<string[]> {
 export function generateId(): string {
   return uuidv4();
 }
+
+// Password reset functions
+export async function setPasswordResetToken(
+  email: string,
+  token: string,
+  expiresAt: Date
+): Promise<boolean> {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    await executeQuery(
+      `UPDATE users 
+       SET reset_token = $1, reset_token_expires = $2, updated_at = NOW()
+       WHERE email = $3`,
+      [token, expiresAt.toISOString(), normalizedEmail]
+    );
+    console.log(`[setPasswordResetToken] Token set for ${normalizedEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`Could not set reset token for ${email}:`, err);
+    return false;
+  }
+}
+
+export async function getUserByResetToken(token: string): Promise<{ email: string; id: string } | null> {
+  try {
+    const user = await executeSingleQuery(
+      `SELECT id, email, reset_token_expires 
+       FROM users 
+       WHERE reset_token = $1`,
+      [token]
+    );
+    
+    if (!user) {
+      console.log(`[getUserByResetToken] No user found with token`);
+      return null;
+    }
+
+    // Check if token is expired
+    const expiresAt = new Date(user.reset_token_expires);
+    const now = new Date();
+    
+    if (now > expiresAt) {
+      console.log(`[getUserByResetToken] Token expired for user ${user.email}`);
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email
+    };
+  } catch (err) {
+    console.error('Could not get user by reset token:', err);
+    return null;
+  }
+}
+
+export async function clearPasswordResetToken(email: string): Promise<boolean> {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    await executeQuery(
+      `UPDATE users 
+       SET reset_token = NULL, reset_token_expires = NULL, updated_at = NOW()
+       WHERE email = $1`,
+      [normalizedEmail]
+    );
+    console.log(`[clearPasswordResetToken] Token cleared for ${normalizedEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`Could not clear reset token for ${email}:`, err);
+    return false;
+  }
+}
+
+export async function updatePasswordByEmail(email: string, newPasswordHash: string): Promise<boolean> {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    await executeQuery(
+      `UPDATE users 
+       SET password_hash = $1, updated_at = NOW()
+       WHERE email = $2`,
+      [newPasswordHash, normalizedEmail]
+    );
+    console.log(`[updatePasswordByEmail] Password updated for ${normalizedEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`Could not update password for ${email}:`, err);
+    return false;
+  }
+}

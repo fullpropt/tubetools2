@@ -196,7 +196,18 @@ export default function Onboarding() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Password</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold">Password</label>
+              {mode === "login" && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-xs text-red-600 hover:underline font-semibold"
+                >
+                  Esqueceu a senha?
+                </button>
+              )}
+            </div>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}

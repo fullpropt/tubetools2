@@ -7,15 +7,42 @@
 export interface SignupRequest {
   name: string;
   email: string;
+  password: string;
 }
 
 export interface LoginRequest {
   email: string;
+  password: string;
 }
 
 export interface AuthResponse {
   user: UserData;
   token: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  resetToken?: string; // For development/testing without email
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 // User

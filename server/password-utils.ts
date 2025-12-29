@@ -68,3 +68,12 @@ export function validatePasswordStrength(password: string): {
     errors,
   };
 }
+
+/**
+ * Generate a secure random token for password reset
+ * @returns Random token string
+ */
+export function generateResetToken(): string {
+  const crypto = require('crypto');
+  return crypto.randomBytes(32).toString('hex');
+}
