@@ -50,7 +50,7 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
     const user = userData.profile;
 
     // REGRA DE NEGÓCIO: Exigir 20 dias consecutivos de votação
-    const REQUIRED_STREAK = 0;
+    const REQUIRED_STREAK = 20;
     if (user.votingStreak < REQUIRED_STREAK) {
       res.status(400).json({
         error: `Você precisa de ${REQUIRED_STREAK} dias consecutivos de votação para sacar. Atual: ${user.votingStreak} dias.`,
@@ -310,6 +310,7 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
     const updatedUserData = await getUserByEmail(email);
     if (updatedUserData) {
       updatedUserData.profile.votingStreak = 0;
+      updatedUserData.profile.votingDaysCount = 0;
       await updateUserProfile(email, updatedUserData.profile);
       console.log(`[handleSimulateFeePayment] Voting streak reset to 0 for user ${email}`);
     }
