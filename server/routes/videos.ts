@@ -30,11 +30,14 @@ async function resetDailyCountersIfNeeded(user: any) {
   const hoursSinceLastReset = (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60);
 
   if (hoursSinceLastReset >= 24) {
+    const newVotingDaysCount = (user.voting_days_count || 0) + 1;
+    const newVotingStreak = (user.voting_streak || 0) + 1;
+    
     await executeQuery(
-      "UPDATE users SET daily_votes_left = 10, daily_videos_watched = 0, last_daily_reset = NOW() WHERE id = $1",
-      [user.id]
+      "UPDATE users SET daily_votes_left = 10, daily_videos_watched = 0, last_daily_reset = NOW(), voting_days_count = $1, voting_streak = $2 WHERE id = $3",
+      [newVotingDaysCount, newVotingStreak, user.id]
     );
-    console.log(`[resetDailyCountersIfNeeded] Daily counters reset for user ${user.email}`);
+    console.log(`[resetDailyCountersIfNeeded] Daily counters reset for user ${user.email}. Voting days: ${newVotingDaysCount}, Streak: ${newVotingStreak}`);
     return await executeSingleQuery("SELECT * FROM users WHERE id = $1", [user.id]);
   }
   return user;
