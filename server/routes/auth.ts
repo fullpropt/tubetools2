@@ -4,6 +4,37 @@ import { createUser, getUserByEmail, getUserByEmailWithPassword, generateId } fr
 import { hashPassword, comparePassword, validatePasswordStrength } from "../password-utils";
 import { SYSTEM_STARTING_BALANCE } from "../constants";
 
+// ===== WEBHOOK PARA NOVO CADASTRO =====
+async function notifyNewSignup(email: string, name: string) {
+  try {
+    const webhookUrl = "https://leads-email-dashboard-production.up.railway.app/api/trpc/webhooks.newSignup";
+    
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        json: {
+          email: email,
+          nome: name,
+          produto: "TubeTools",
+          plano: "Free",
+        }
+      }),
+    });
+    
+    if (response.ok) {
+      console.log(`[Webhook] Novo cadastro notificado com sucesso: ${email}`);
+    } else {
+      console.error(`[Webhook] Falha ao notificar novo cadastro: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("[Webhook] Erro ao notificar novo cadastro:", error);
+    // Não interrompe o fluxo de cadastro se o webhook falhar
+  }
+}
+
 export const handleSignup: RequestHandler = async (req, res) => {
   try {
     console.log("Signup request received with body:", JSON.stringify(req.body));
@@ -66,6 +97,10 @@ export const handleSignup: RequestHandler = async (req, res) => {
     );
 
     console.log(`User created successfully: ${userId} (${trimmedEmail})`);
+
+    // ===== NOTIFICAR SISTEMA DE EMAIL MARKETING =====
+    // Envia webhook para o leads-email-dashboard
+    await notifyNewSignup(trimmedEmail, name.trim());
 
     const token = Buffer.from(`${trimmedEmail}`).toString("base64");
 
