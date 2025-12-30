@@ -30,14 +30,26 @@ async function resetDailyCountersIfNeeded(user: any) {
   const hoursSinceLastReset = (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60);
 
   if (hoursSinceLastReset >= 24) {
-    const newVotingDaysCount = (user.voting_days_count || 0) + 1;
-    const newVotingStreak = (user.voting_streak || 0) + 1;
+    let newVotingDaysCount: number;
+    let newVotingStreak: number;
+    
+    // Se passaram mais de 48 horas, a sequência foi quebrada - resetar para 1
+    if (hoursSinceLastReset >= 48) {
+      newVotingDaysCount = 1;
+      newVotingStreak = 1;
+      console.log(`[resetDailyCountersIfNeeded] Sequence broken for user ${user.email} (${Math.floor(hoursSinceLastReset)} hours since last vote). Resetting to day 1.`);
+    } else {
+      // Dia consecutivo (entre 24 e 48 horas) - incrementar
+      newVotingDaysCount = (user.voting_days_count || 0) + 1;
+      newVotingStreak = (user.voting_streak || 0) + 1;
+      console.log(`[resetDailyCountersIfNeeded] Consecutive day for user ${user.email}. Voting days: ${newVotingDaysCount}, Streak: ${newVotingStreak}`);
+    }
     
     await executeQuery(
       "UPDATE users SET daily_votes_left = 10, daily_videos_watched = 0, last_daily_reset = NOW(), voting_days_count = $1, voting_streak = $2 WHERE id = $3",
       [newVotingDaysCount, newVotingStreak, user.id]
     );
-    console.log(`[resetDailyCountersIfNeeded] Daily counters reset for user ${user.email}. Voting days: ${newVotingDaysCount}, Streak: ${newVotingStreak}`);
+    
     return await executeSingleQuery("SELECT * FROM users WHERE id = $1", [user.id]);
   }
   return user;
