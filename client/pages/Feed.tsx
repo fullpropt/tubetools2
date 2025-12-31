@@ -259,7 +259,7 @@ export default function Feed() {
       if (watchedSeconds < effectiveDuration) {
         const remaining = Math.ceil(secondsRemaining);
         setError(
-          `Por favor, assista o vídeo completo. ${remaining}s restantes.`,
+          `Please watch the full video. ${remaining}s remaining.`,
         );
         return;
       }
@@ -486,14 +486,14 @@ export default function Feed() {
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4" />
                           <p className="text-white text-sm">
-                            Carregando vídeo...
+                            Loading video...
                           </p>
                         </div>
                       )}
                       {videoLoadError && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20">
                           <p className="text-red-500 text-sm mb-4">
-                            Erro ao carregar vídeo
+                            Error loading video
                           </p>
                           <button
                             onClick={() => {
@@ -502,7 +502,7 @@ export default function Feed() {
                             }}
                             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
                           >
-                            Tentar Novamente
+                            Try Again
                           </button>
                         </div>
                       )}
@@ -526,7 +526,7 @@ export default function Feed() {
                               `[Feed] Max attempts reached, skipping to next video`,
                             );
                             setError(
-                              "Vídeo não carregou. Pulando para o próximo...",
+                              "Video failed to load. Skipping to next...",
                             );
 
                             setTimeout(() => {
@@ -639,11 +639,11 @@ export default function Feed() {
                   {!votedVideos.has(selectedVideo.id) &&
                     watchedSeconds < videoDuration && (
                       <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 text-sm">
-                        Por favor, assista o vídeo completo.{" "}
+                        Please watch the full video.{" "}
                         <span className="font-semibold">
                           {Math.ceil(secondsRemaining)}s
                         </span>{" "}
-                        restantes para votar.
+                        remaining to vote.
                       </div>
                     )}
 
