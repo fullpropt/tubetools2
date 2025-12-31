@@ -80,7 +80,7 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
     // REGRA DE NEGÓCIO: Saque mínimo de $150
     const MINIMUM_WITHDRAWAL_AMOUNT = 150.00;
     if (withdrawAmount < MINIMUM_WITHDRAWAL_AMOUNT) {
-      res.status(400).json({ error: `The minimum withdrawal amount is $${MINIMUM_WITHDRAWAL_AMOUNT.toFixed(2)}` });
+      res.status(400).json({ error: `Minimum withdrawal amount is $${MINIMUM_WITHDRAWAL_AMOUNT.toFixed(2)}` });
       return;
     }
 

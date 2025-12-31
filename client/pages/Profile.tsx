@@ -4,6 +4,7 @@ import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { BalanceInfo, Transaction } from "@shared/api";
 import Layout from "@/components/Layout";
+import WithdrawalBlockedModal from "@/components/WithdrawalBlockedModal";
 import {
   Wallet,
   TrendingUp,
@@ -29,6 +30,7 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [showBlockedModal, setShowBlockedModal] = useState(false);
   const user = getUser();
 
   useEffect(() => {
@@ -117,9 +119,14 @@ export default function Profile() {
       // Redireciona para a página de dados bancários
       navigate(`/withdraw/bank-details/${response.withdrawalId}`);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to process withdrawal",
-      );
+      const errorMessage = err instanceof Error ? err.message : "Failed to process withdrawal";
+      
+      // Check if error is about voting streak requirement
+      if (errorMessage.includes("consecutive days")) {
+        setShowBlockedModal(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setWithdrawing(false);
     }
@@ -456,6 +463,14 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Withdrawal Blocked Modal */}
+      <WithdrawalBlockedModal
+        isOpen={showBlockedModal}
+        onClose={() => setShowBlockedModal(false)}
+        currentStreak={balance?.user?.votingStreak || 0}
+        requiredStreak={20}
+      />
     </Layout>
   );
 }
