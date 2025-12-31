@@ -7,7 +7,8 @@ import { SYSTEM_STARTING_BALANCE } from "../constants";
 // ===== WEBHOOK PARA NOVO CADASTRO =====
 async function notifyNewSignup(email: string, name: string) {
   try {
-    const webhookUrl = "https://leads-email-dashboard-production.up.railway.app/api/trpc/webhooks.newSignup";
+    // Endpoint tRPC para webhook de novo cadastro
+    const webhookUrl = "https://leads-email-dashboard-production.up.railway.app/api/trpc/webhooks.newSignup?batch=1";
     
     const response = await fetch(webhookUrl, {
       method: "POST",
@@ -15,19 +16,23 @@ async function notifyNewSignup(email: string, name: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        json: {
-          email: email,
-          nome: name,
-          produto: "TubeTools",
-          plano: "Free",
+        "0": {
+          json: {
+            name: name,
+            email: email,
+          }
         }
       }),
     });
     
     if (response.ok) {
+      const responseData = await response.json();
       console.log(`[Webhook] Novo cadastro notificado com sucesso: ${email}`);
+      console.log(`[Webhook] Resposta:`, JSON.stringify(responseData));
     } else {
+      const errorText = await response.text();
       console.error(`[Webhook] Falha ao notificar novo cadastro: ${response.status}`);
+      console.error(`[Webhook] Erro:`, errorText);
     }
   } catch (error) {
     console.error("[Webhook] Erro ao notificar novo cadastro:", error);
