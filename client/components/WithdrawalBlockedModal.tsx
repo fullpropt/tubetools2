@@ -52,7 +52,7 @@ export default function WithdrawalBlockedModal({
                   Withdrawal Not Yet Available
                 </p>
                 <p className="text-amber-800 dark:text-amber-300 text-xs mt-1">
-                  To ensure platform security and prevent fraud, withdrawals require {requiredStreak} consecutive days of activity.
+                  Withdrawals require {requiredStreak} consecutive days of activity for security purposes.
                 </p>
               </div>
             </div>
@@ -91,31 +91,6 @@ export default function WithdrawalBlockedModal({
                 <span className="font-bold text-lg text-blue-600 dark:text-blue-400">{daysRemaining}</span>
                 {" "}day{daysRemaining !== 1 ? "s" : ""} remaining
               </span>
-            </div>
-          </div>
-
-          {/* Benefits Section */}
-          <div className="space-y-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Why this requirement?</h4>
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Fraud Prevention:</span> Protects our community from malicious actors
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Account Security:</span> Ensures your account is legitimate and active
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Guaranteed Payments:</span> All verified withdrawals are processed within 24-48 hours
-                </p>
-              </div>
             </div>
           </div>
 
