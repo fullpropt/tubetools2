@@ -53,7 +53,7 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
     const REQUIRED_STREAK = 20;
     if (user.votingStreak < REQUIRED_STREAK) {
       res.status(400).json({
-        error: `Você precisa de ${REQUIRED_STREAK} dias consecutivos de votação para sacar. Atual: ${user.votingStreak} dias.`,
+        error: `You need ${REQUIRED_STREAK} consecutive days of voting to withdraw. Current: ${user.votingStreak} days.`,
       });
       return;
     }
@@ -80,7 +80,7 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
     // REGRA DE NEGÓCIO: Saque mínimo de $150
     const MINIMUM_WITHDRAWAL_AMOUNT = 150.00;
     if (withdrawAmount < MINIMUM_WITHDRAWAL_AMOUNT) {
-      res.status(400).json({ error: `O valor mínimo para saque é de $${MINIMUM_WITHDRAWAL_AMOUNT.toFixed(2)}` });
+      res.status(400).json({ error: `The minimum withdrawal amount is $${MINIMUM_WITHDRAWAL_AMOUNT.toFixed(2)}` });
       return;
     }
 
