@@ -454,7 +454,10 @@ export async function checkAndResetBalanceIfInactive(
 
     // If user has no votes today and no votes yesterday, reset balance
     if (votesYesterday === 0 && user.balance > 0) {
-      console.log(`[checkAndResetBalanceIfInactive] User ${email} has no votes yesterday, resetting balance from ${user.balance} to 0`);
+      // CORREÇÃO: Salvar o saldo ANTES de zerar para usar na transação
+      const previousBalance = user.balance;
+      
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} has no votes yesterday, resetting balance from ${previousBalance} to 0`);
       
       // Reset balance to 0
       user.balance = 0;
@@ -462,15 +465,19 @@ export async function checkAndResetBalanceIfInactive(
       // Reset voting streak
       user.votingStreak = 0;
       
+      // Reset voting days count (também deve resetar os dias de votação)
+      user.votingDaysCount = 0;
+      
       // Save the updated profile
       await saveUserData(email, userData);
       
       // Add a debit transaction for the reset
+      // CORREÇÃO: Usar previousBalance ao invés de userData.profile.balance (que já é 0)
       const transactionId = generateId();
       const transaction = {
         id: transactionId,
         type: "debit" as const,
-        amount: userData.profile.balance,
+        amount: previousBalance, // CORREÇÃO: Era userData.profile.balance (sempre 0)
         description: "Balance reset due to inactivity (no vote in 24 hours)",
         status: "completed" as const,
         createdAt: now.toISOString(),

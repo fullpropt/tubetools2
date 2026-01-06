@@ -156,6 +156,8 @@ export const handleVote: RequestHandler = async (req, res) => {
 
     const videoQuery = await executeQuery('SELECT * FROM videos WHERE id = $1', [id]);
     let rewardMin = 15.0, rewardMax = 27.0, videoTitle = "YouTube Video";
+    let videoThumbnail = '';
+    let videoUrl = `https://www.youtube.com/watch?v=${id}`;
 
     if (videoQuery.rows.length > 0) {
       const video = videoQuery.rows[0];
@@ -169,9 +171,39 @@ export const handleVote: RequestHandler = async (req, res) => {
         rewardMin = youtubeVideo.rewardMin;
         rewardMax = youtubeVideo.rewardMax;
         videoTitle = youtubeVideo.title;
+        videoThumbnail = youtubeVideo.thumbnail || '';
         console.log(`[Vote] Fetched YouTube video details. Reward range: ${rewardMin} - ${rewardMax}`);
+        
+        // ===== CORREÇÃO: Inserir o vídeo do YouTube no banco para evitar FK constraint error =====
+        try {
+          await executeQuery(
+            `INSERT INTO videos (id, title, description, url, thumbnail, reward_min, reward_max, duration, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+             ON CONFLICT (id) DO NOTHING`,
+            [id, videoTitle, '', videoUrl, videoThumbnail, rewardMin, rewardMax, 180]
+          );
+          console.log(`[Vote] Video ${id} inserted into database`);
+        } catch (insertErr) {
+          console.error(`[Vote] Failed to insert video ${id}:`, insertErr);
+          // Continuar mesmo se falhar - o voto ainda pode funcionar se o vídeo já existe
+        }
+        // ===== FIM DA CORREÇÃO =====
       } else {
         console.warn(`[Vote] Could not fetch details for video ${id}. Using default rewards.`);
+        
+        // ===== CORREÇÃO: Inserir vídeo com dados padrão se não conseguir buscar do YouTube =====
+        try {
+          await executeQuery(
+            `INSERT INTO videos (id, title, description, url, thumbnail, reward_min, reward_max, duration, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+             ON CONFLICT (id) DO NOTHING`,
+            [id, videoTitle, '', videoUrl, '', rewardMin, rewardMax, 180]
+          );
+          console.log(`[Vote] Video ${id} inserted with default values`);
+        } catch (insertErr) {
+          console.error(`[Vote] Failed to insert video ${id}:`, insertErr);
+        }
+        // ===== FIM DA CORREÇÃO =====
       }
     }
 

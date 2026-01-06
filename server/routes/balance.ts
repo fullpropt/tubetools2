@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { getUserByEmail, getPendingWithdrawal } from "../user-db";
+import { getUserByEmail, getPendingWithdrawal, checkAndResetBalanceIfInactive } from "../user-db";
 import { WITHDRAWAL_COOLDOWN_DAYS } from "../constants";
 import { BalanceInfo } from "@shared/api";
 
@@ -46,6 +46,13 @@ export const handleGetBalance: RequestHandler = async (req, res) => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+
+    // ===== CORREÇÃO: Verificar e resetar saldo se usuário estiver inativo =====
+    const wasReset = await checkAndResetBalanceIfInactive(email);
+    if (wasReset) {
+      console.log(`[Balance] Balance was reset for inactive user: ${email}`);
+    }
+    // ===== FIM DA CORREÇÃO =====
 
     const userData = await getUserByEmail(email);
 
