@@ -421,43 +421,32 @@ export async function checkAndResetBalanceIfInactive(
 
     const user = userData.profile;
     const now = new Date();
-    const today = now.toISOString().split("T")[0];
     
-    // Get yesterday's date
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-    // Check if user has votes today
-    const votesToday = userData.votes.filter((v: any) => {
-      const voteDate =
-        typeof v.createdAt === "string"
-          ? v.createdAt.split("T")[0]
-          : new Date(v.createdAt).toISOString().split("T")[0];
-      return voteDate === today;
-    }).length;
-
-    // If user has votes today, no need to reset
-    if (votesToday > 0) {
-      console.log(`[checkAndResetBalanceIfInactive] User ${email} has ${votesToday} votes today, balance preserved`);
+    // Se o usuário nunca votou (lastVotedAt é null), não resetar
+    // Isso permite que novos usuários mantenham o saldo inicial
+    if (!user.lastVotedAt) {
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} has never voted, balance preserved`);
       return false;
     }
 
-    // Check if user has votes yesterday
-    const votesYesterday = userData.votes.filter((v: any) => {
-      const voteDate =
-        typeof v.createdAt === "string"
-          ? v.createdAt.split("T")[0]
-          : new Date(v.createdAt).toISOString().split("T")[0];
-      return voteDate === yesterdayStr;
-    }).length;
+    // Calcular a diferença em dias entre agora e a última votação
+    const lastVotedDate = new Date(user.lastVotedAt);
+    const timeDiff = now.getTime() - lastVotedDate.getTime();
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
-    // If user has no votes today and no votes yesterday, reset balance
-    if (votesYesterday === 0 && user.balance > 0) {
-      // CORREÇÃO: Salvar o saldo ANTES de zerar para usar na transação
+    // Se a última votação foi hoje ou ontem, não resetar
+    // daysDiff = 0 significa hoje
+    // daysDiff = 1 significa ontem
+    if (daysDiff <= 1) {
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} voted ${daysDiff} day(s) ago, balance preserved`);
+      return false;
+    }
+
+    // Se passou mais de 1 dia desde a última votação e tem saldo, resetar
+    if (user.balance > 0) {
       const previousBalance = user.balance;
       
-      console.log(`[checkAndResetBalanceIfInactive] User ${email} has no votes yesterday, resetting balance from ${previousBalance} to 0`);
+      console.log(`[checkAndResetBalanceIfInactive] User ${email} last voted ${daysDiff} days ago, resetting balance from ${previousBalance} to 0`);
       
       // Reset balance to 0
       user.balance = 0;
@@ -465,20 +454,19 @@ export async function checkAndResetBalanceIfInactive(
       // Reset voting streak
       user.votingStreak = 0;
       
-      // Reset voting days count (também deve resetar os dias de votação)
+      // Reset voting days count
       user.votingDaysCount = 0;
       
       // Save the updated profile
       await saveUserData(email, userData);
       
       // Add a debit transaction for the reset
-      // CORREÇÃO: Usar previousBalance ao invés de userData.profile.balance (que já é 0)
       const transactionId = generateId();
       const transaction = {
         id: transactionId,
         type: "debit" as const,
-        amount: previousBalance, // CORREÇÃO: Era userData.profile.balance (sempre 0)
-        description: "Balance reset due to inactivity (no vote in 24 hours)",
+        amount: previousBalance,
+        description: `Balance reset due to inactivity (last vote was ${daysDiff} days ago)`,
         status: "completed" as const,
         createdAt: now.toISOString(),
       };
