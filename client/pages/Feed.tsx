@@ -17,6 +17,7 @@ import {
   Calendar,
   Star,
   Target,
+  AlertTriangle,
 } from "lucide-react";
 
 interface MoneyAnimationData {
@@ -64,6 +65,9 @@ export default function Feed() {
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoLoadError, setVideoLoadError] = useState(false);
   const [videoRetryTrigger, setVideoRetryTrigger] = useState(0);
+  const [lastVotedAt, setLastVotedAt] = useState<string | null>(user?.lastVotedAt || null);
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [daysSinceLastVote, setDaysSinceLastVote] = useState(0);
 
   // Shuffle array
   const shuffleArray = (array: any[]) => {
@@ -174,6 +178,28 @@ export default function Feed() {
           setVotedVideos(votedVideoIds);
         }
         
+        // Update lastVotedAt and check for inactivity warning
+        if (data.user.lastVotedAt) {
+          setLastVotedAt(data.user.lastVotedAt);
+          
+          // Calculate days since last vote
+          const lastVoteDate = new Date(data.user.lastVotedAt);
+          const now = new Date();
+          const timeDiff = now.getTime() - lastVoteDate.getTime();
+          const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+          setDaysSinceLastVote(daysDiff);
+          
+          // Show warning if last vote was not today
+          const today = now.toISOString().split('T')[0];
+          const lastVoteDay = lastVoteDate.toISOString().split('T')[0];
+          
+          if (lastVoteDay !== today && daysDiff >= 1) {
+            setShowInactivityWarning(true);
+          } else {
+            setShowInactivityWarning(false);
+          }
+        }
+        
         // Update local storage with synced user data
         const authToken = localStorage.getItem("authToken");
         if (authToken) {
@@ -277,6 +303,10 @@ export default function Feed() {
         setTotalVideosWatched(response.totalVideosWatched || 0);
         setVotingStreak(response.votingStreak || 0);
         setVotingDaysCount(response.votingDaysCount || votingDaysCount);
+        
+        // Hide inactivity warning after successful vote
+        setShowInactivityWarning(false);
+        setDaysSinceLastVote(0);
 
         // Atualizar o saldo imediatamente com o valor retornado pelo servidor
         if (response.newBalance !== undefined) {
@@ -398,6 +428,24 @@ export default function Feed() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Main Video Player */}
             <div className="lg:col-span-2 space-y-4">
+              {/* Inactivity Warning Banner */}
+              {showInactivityWarning && (
+                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950 border border-amber-300 dark:border-amber-700 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-800 dark:text-amber-200">
+                      Warning: Vote today to keep your balance!
+                    </p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      {daysSinceLastVote === 1 
+                        ? "You didn't vote yesterday. If you don't vote today, your balance will be reset to $0.00 tomorrow."
+                        : `You haven't voted in ${daysSinceLastVote} days. Vote now to protect your balance of $${(getUser()?.balance || 0).toFixed(2)}!`
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Daily Votes & Stats */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="card-base p-4 bg-gradient-to-r from-red-600/10 to-red-600/5 border-red-200 dark:border-red-900">

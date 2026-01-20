@@ -98,7 +98,7 @@ export default function HowItWorks() {
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Your balance will expire if you do not watch at least one ad per day.</span>
+              <span><strong>Important:</strong> Your balance will be reset to $0.00 if you skip more than one day without voting. You can skip one day, but if you miss two consecutive days, you will lose all your accumulated balance and progress.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
