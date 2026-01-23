@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleSignup, handleLogin, handleChangePassword } from "./routes/auth";
+import { handleSignup, handleLogin, handleChangePassword, handleUpdateName } from "./routes/auth";
 import { handleForgotPassword, handleResetPassword } from "./routes/password-reset";
 import {
   handleGetVideos,
@@ -49,6 +49,7 @@ export function createServer() {
   app.post(["/auth/signup", "/api/auth/signup"], handleSignup);
   app.post(["/auth/login", "/api/auth/login"], handleLogin);
   app.post(["/auth/change-password", "/api/auth/change-password"], handleChangePassword);
+  app.post(["/auth/update-name", "/api/auth/update-name"], handleUpdateName);
   app.post(["/auth/forgot-password", "/api/auth/forgot-password"], handleForgotPassword);
   app.post(["/auth/reset-password", "/api/auth/reset-password"], handleResetPassword);
 
