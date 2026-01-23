@@ -5,6 +5,7 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import { BalanceInfo, Transaction } from "@shared/api";
 import Layout from "@/components/Layout";
 import WithdrawalBlockedModal from "@/components/WithdrawalBlockedModal";
+import EditNameModal from "@/components/EditNameModal";
 import {
   Wallet,
   TrendingUp,
@@ -415,7 +416,7 @@ export default function Profile() {
                 </p>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold">{userName}</p>
-                  {/* <EditNameModal currentName={userName} onNameUpdated={handleNameUpdated} /> */}
+                  <EditNameModal currentName={userName} onNameUpdated={handleNameUpdated} />
                 </div>
               </div>
               <div>

@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 const distPath = path.join(__dirname, "dist/spa");
 
 // Import all route handlers directly
-import { handleSignup, handleLogin } from "./server/routes/auth.ts";
+import { handleSignup, handleLogin, handleUpdateName } from "./server/routes/auth.ts";
 import {
   handleGetVideos,
   handleGetVideo,
@@ -48,6 +48,7 @@ function createServer() {
   // Auth routes
   app.post(["/auth/signup", "/api/auth/signup"], handleSignup);
   app.post(["/auth/login", "/api/auth/login"], handleLogin);
+  app.post(["/auth/update-name", "/api/auth/update-name"], handleUpdateName);
 
   // Video routes
   app.get(["/videos", "/api/videos"], handleGetVideos);

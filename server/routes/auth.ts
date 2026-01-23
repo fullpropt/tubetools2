@@ -283,3 +283,90 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
     }
   }
 };
+
+
+// ===== INTERFACE PARA UPDATE NAME =====
+interface UpdateNameRequest {
+  name: string;
+}
+
+export const handleUpdateName: RequestHandler = async (req, res) => {
+  try {
+    console.log("[handleUpdateName] Starting name update request");
+    
+    const token = req.headers.authorization;
+    console.log("[handleUpdateName] Token present:", !!token);
+    
+    const email = token ? Buffer.from(token.replace("Bearer ", ""), "base64").toString() : null;
+    console.log("[handleUpdateName] Email extracted:", email);
+
+    if (!email) {
+      console.warn("[handleUpdateName] No email found in token");
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const { name } = req.body as UpdateNameRequest;
+
+    // Validate name
+    if (!name || typeof name !== "string") {
+      console.warn("[handleUpdateName] Name missing or invalid");
+      res.status(400).json({ error: "Name is required" });
+      return;
+    }
+
+    const trimmedName = name.trim();
+
+    if (trimmedName.length < 2) {
+      console.warn("[handleUpdateName] Name too short");
+      res.status(400).json({ error: "Name must be at least 2 characters" });
+      return;
+    }
+
+    if (trimmedName.length > 50) {
+      console.warn("[handleUpdateName] Name too long");
+      res.status(400).json({ error: "Name must be less than 50 characters" });
+      return;
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    console.log("[handleUpdateName] Fetching user by email:", trimmedEmail);
+    
+    const userData = await getUserByEmail(trimmedEmail);
+
+    if (!userData) {
+      console.warn("[handleUpdateName] User not found:", trimmedEmail);
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    // Update name in database
+    console.log("[handleUpdateName] Updating name in database");
+    const { executeQuery } = await import("../db-postgres");
+    const result = await executeQuery(
+      "UPDATE users SET name = $1, updated_at = NOW() WHERE email = $2",
+      [trimmedName, trimmedEmail]
+    );
+    console.log("[handleUpdateName] Database update result:", result);
+
+    console.log(`[handleUpdateName] Name changed successfully for user: ${trimmedEmail}`);
+    res.status(200).json({ 
+      success: true, 
+      message: "Name updated successfully",
+      name: trimmedName
+    });
+  } catch (error) {
+    console.error("[handleUpdateName] Unexpected error:", error);
+    console.error("[handleUpdateName] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("[handleUpdateName] Error message:", error instanceof Error ? error.message : String(error));
+    console.error("[handleUpdateName] Error stack:", error instanceof Error ? error.stack : "N/A");
+    
+    // Make sure we always return JSON
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: "Failed to update name", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  }
+};
