@@ -324,11 +324,11 @@ export default function Onboarding() {
         <div className="text-center mt-6">
           <p className="text-xs text-muted-foreground">
             By continuing, you agree to our{" "}
-            <Link to="/terms" className="text-red-600 hover:underline">
+            <Link to="/terms-of-service" className="text-red-600 hover:underline">
               Terms of Service
-            </Link>{" "}
+            </Link>
             and{" "}
-            <Link to="/privacy" className="text-red-600 hover:underline">
+            <Link to="/privacy-policy" className="text-red-600 hover:underline">
               Privacy Policy
             </Link>
           </p>
