@@ -45,6 +45,17 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+// Delete Account
+export interface DeleteAccountRequest {
+  password: string;
+  confirmation: string; // User must type "DELETE" to confirm
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  message: string;
+}
+
 // User
 export interface UserData {
   id: string;

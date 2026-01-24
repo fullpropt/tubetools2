@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
             Back
           </button>
           <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-sm text-gray-500">Last updated: December 2025</p>
+          <p className="text-sm text-gray-500">Last updated: January 2026</p>
         </div>
 
         {/* Content */}
@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
                 If you have questions or comments about this Privacy Policy, please contact us at:
               </p>
               <p className="mt-4">
-                <strong>Email:</strong> support@tubetools.com
+                <strong>Email:</strong> supfullpropt@gmail.com
               </p>
             </section>
 
@@ -96,7 +96,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">8. Your Privacy Rights</h2>
               <p>
-                Depending on your location, you may have certain rights regarding your personal information, including:
+                Under the LGPD (Lei Geral de Proteção de Dados) and other privacy laws, you have certain rights regarding your personal information, including:
               </p>
               <ul className="list-disc list-inside space-y-2 mt-4">
                 <li>The right to access your personal information</li>
@@ -107,14 +107,21 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">9. Cookies and Tracking Technologies</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">9. How to Exercise Your Rights</h2>
+              <p>
+                To exercise your rights, such as accessing or correcting your data, please contact us at the email address provided above. To delete your account and all associated personal information, you can use the "Delete Account" feature available in your profile settings. This action is irreversible.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">10. Cookies and Tracking Technologies</h2>
               <p>
                 We use cookies and similar tracking technologies to track activity on our website and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Site.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">10. Children's Privacy</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">11. Children's Privacy</h2>
               <p>
                 Our Site is not intended for children under the age of 18. We do not knowingly collect personal information from children under 18. If we become aware that a child under 18 has provided us with personal information, we will take steps to delete such information and terminate the child's account.
               </p>

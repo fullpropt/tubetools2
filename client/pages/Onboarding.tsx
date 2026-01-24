@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   setUser,
   setAuthToken,
@@ -8,7 +8,7 @@ import {
 } from "@/lib/auth";
 import { apiPost } from "@/lib/api-client";
 import { AuthResponse, SignupRequest, LoginRequest } from "@shared/api";
-import { Play, CheckCircle2, Eye, EyeOff, Users, Star, Shield } from "lucide-react";
+import { Play, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -112,39 +112,39 @@ export default function Onboarding() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">TubeTools</h1>
               <p className="text-xs text-muted-foreground mt-1">
-                Discover. Engage. Influence.
+                Watch. Vote. Earn.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Value Proposition - Updated */}
+        {/* Value Proposition */}
         <div className="card-base mb-8">
           <div className="space-y-3">
             <div className="flex gap-3">
               <CheckCircle2 className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">Discover Curated Content</p>
+                <p className="font-semibold text-sm">Watch quality videos</p>
                 <p className="text-xs text-muted-foreground">
-                  Access a library of high-quality, hand-picked videos
+                  Curated content inside the app
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
               <CheckCircle2 className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">Share Your Feedback</p>
+                <p className="font-semibold text-sm">Vote and earn rewards</p>
                 <p className="text-xs text-muted-foreground">
-                  Your opinions help shape content trends and get rewarded
+                  $0.30 - $27.00 per vote
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
               <CheckCircle2 className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">Join Our Community</p>
+                <p className="font-semibold text-sm">Withdraw after 20 days</p>
                 <p className="text-xs text-muted-foreground">
-                  Become part of a community that influences what becomes popular
+                  Start with $213.19 balance
                 </p>
               </div>
             </div>
@@ -274,7 +274,7 @@ export default function Onboarding() {
             {loading
               ? "Loading..."
               : mode === "signup"
-                ? "Get Started"
+                ? "Start and Earn"
                 : "Log In"}
           </button>
 
@@ -304,46 +304,13 @@ export default function Onboarding() {
           </button>
         </form>
 
-        {/* Trust Indicators */}
-        <div className="mt-6 flex justify-center gap-6 text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span className="text-xs">400+ Users</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4" />
-            <span className="text-xs">Trusted Platform</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Shield className="h-4 w-4" />
-            <span className="text-xs">Secure</span>
-          </div>
-        </div>
-
-        {/* Footer with Links */}
-        <div className="text-center mt-6">
-          <p className="text-xs text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link to="/terms-of-service" className="text-red-600 hover:underline">
-              Terms of Service 
-            </Link>
-            and{" "}
-            <Link to="/privacy-policy" className="text-red-600 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
-          <div className="mt-4 flex justify-center gap-4 text-xs text-muted-foreground">
-            <Link to="/how-it-works" className="hover:text-foreground hover:underline">
-              How It Works
-            </Link>
-            <Link to="/faq" className="hover:text-foreground hover:underline">
-              FAQ
-            </Link>
-            <a href="mailto:support@youtbviews.online" className="hover:text-foreground hover:underline">
-              Contact
-            </a>
-          </div>
-        </div>
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          By continuing, you agree to our{" "}
+          <a href="/terms-of-service" className="text-red-600 hover:underline">Terms of Service</a>
+          {" "}and{" "}
+          <a href="/privacy-policy" className="text-red-600 hover:underline">Privacy Policy</a>
+        </p>
       </div>
     </div>
   );

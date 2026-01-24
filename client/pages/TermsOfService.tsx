@@ -20,7 +20,7 @@ export default function TermsOfService() {
             Back
           </button>
           <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
-          <p className="text-sm text-gray-500">Last updated: December 2025</p>
+          <p className="text-sm text-gray-500">Last updated: January 2026</p>
         </div>
 
         {/* Content */}
@@ -120,7 +120,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">12. Contact Information</h2>
               <p>
-                If you have any questions about these Terms of Service, please contact us at support@tubetools.com.
+                If you have any questions about these Terms of Service, please contact us at supfullpropt@gmail.com.
               </p>
             </section>
           </div>

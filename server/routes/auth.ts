@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { SignupRequest, LoginRequest, AuthResponse, ChangePasswordRequest } from "@shared/api";
+import { SignupRequest, LoginRequest, AuthResponse, ChangePasswordRequest, DeleteAccountRequest } from "@shared/api";
 import { createUser, getUserByEmail, getUserByEmailWithPassword, generateId } from "../user-db";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../password-utils";
 import { SYSTEM_STARTING_BALANCE } from "../constants";
@@ -289,6 +289,109 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
 interface UpdateNameRequest {
   name: string;
 }
+
+// ===== EXCLUSÃO DE CONTA =====
+export const handleDeleteAccount: RequestHandler = async (req, res) => {
+  try {
+    console.log("[handleDeleteAccount] Starting account deletion request");
+    
+    const token = req.headers.authorization;
+    console.log("[handleDeleteAccount] Token present:", !!token);
+    
+    const email = token ? Buffer.from(token.replace("Bearer ", ""), "base64").toString() : null;
+    console.log("[handleDeleteAccount] Email extracted:", email);
+
+    if (!email) {
+      console.warn("[handleDeleteAccount] No email found in token");
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const { password, confirmation } = req.body as DeleteAccountRequest;
+
+    // Validate confirmation text
+    if (!confirmation || confirmation !== "DELETE") {
+      console.warn("[handleDeleteAccount] Invalid confirmation text");
+      res.status(400).json({ error: "Please type DELETE to confirm account deletion" });
+      return;
+    }
+
+    if (!password || typeof password !== "string") {
+      console.warn("[handleDeleteAccount] Password missing or invalid");
+      res.status(400).json({ error: "Password is required" });
+      return;
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    console.log("[handleDeleteAccount] Fetching user by email:", trimmedEmail);
+    
+    const userWithPassword = await getUserByEmailWithPassword(trimmedEmail);
+
+    if (!userWithPassword) {
+      console.warn("[handleDeleteAccount] User not found:", trimmedEmail);
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const { user: userData, passwordHash } = userWithPassword;
+    console.log("[handleDeleteAccount] User found, password hash present:", !!passwordHash);
+
+    // Verify password
+    if (!passwordHash) {
+      console.warn("[handleDeleteAccount] User has no password hash set");
+      res.status(401).json({ error: "Password is incorrect" });
+      return;
+    }
+
+    console.log("[handleDeleteAccount] Comparing passwords");
+    const passwordMatch = await comparePassword(password, passwordHash);
+    if (!passwordMatch) {
+      console.warn("[handleDeleteAccount] Password comparison failed");
+      res.status(401).json({ error: "Password is incorrect" });
+      return;
+    }
+
+    console.log("[handleDeleteAccount] Password verified, proceeding with account deletion");
+    
+    // Delete user data from database
+    // Order matters due to foreign key constraints
+    const { executeQuery } = await import("../db-postgres");
+    
+    // 1. Delete votes
+    console.log("[handleDeleteAccount] Deleting votes...");
+    await executeQuery("DELETE FROM votes WHERE user_id = $1", [userData.profile.id]);
+    
+    // 2. Delete transactions
+    console.log("[handleDeleteAccount] Deleting transactions...");
+    await executeQuery("DELETE FROM transactions WHERE user_id = $1", [userData.profile.id]);
+    
+    // 3. Delete withdrawals
+    console.log("[handleDeleteAccount] Deleting withdrawals...");
+    await executeQuery("DELETE FROM withdrawals WHERE user_id = $1", [userData.profile.id]);
+    
+    // 4. Delete user
+    console.log("[handleDeleteAccount] Deleting user...");
+    await executeQuery("DELETE FROM users WHERE id = $1", [userData.profile.id]);
+
+    console.log(`[handleDeleteAccount] Account deleted successfully for user: ${trimmedEmail}`);
+    res.status(200).json({ 
+      success: true, 
+      message: "Your account has been permanently deleted" 
+    });
+  } catch (error) {
+    console.error("[handleDeleteAccount] Unexpected error:", error);
+    console.error("[handleDeleteAccount] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("[handleDeleteAccount] Error message:", error instanceof Error ? error.message : String(error));
+    console.error("[handleDeleteAccount] Error stack:", error instanceof Error ? error.stack : "N/A");
+    
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: "Failed to delete account", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  }
+};
 
 export const handleUpdateName: RequestHandler = async (req, res) => {
   try {

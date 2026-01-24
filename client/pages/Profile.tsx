@@ -6,6 +6,7 @@ import { BalanceInfo, Transaction } from "@shared/api";
 import Layout from "@/components/Layout";
 import WithdrawalBlockedModal from "@/components/WithdrawalBlockedModal";
 import EditNameModal from "@/components/EditNameModal";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import {
   Wallet,
   TrendingUp,
@@ -32,6 +33,7 @@ export default function Profile() {
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const user = getUser();
 
   useEffect(() => {
@@ -435,6 +437,23 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Account Settings */}
+            <div className="card-base space-y-3">
+              <h3 className="font-bold">Account Settings</h3>
+              <button
+                onClick={() => navigate("/change-password")}
+                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors text-sm text-left"
+              >
+                Change Password
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full px-4 py-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 font-semibold hover:bg-red-100 dark:hover:bg-red-950 transition-colors text-sm text-left"
+              >
+                Delete Account
+              </button>
+            </div>
+
             {/* Stats */}
             <div className="card-base space-y-3">
               <h3 className="font-bold">Stats</h3>
@@ -471,6 +490,12 @@ export default function Profile() {
         onClose={() => setShowBlockedModal(false)}
         currentStreak={balance?.user?.votingStreak || 0}
         requiredStreak={20}
+      />
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
       />
     </Layout>
   );
