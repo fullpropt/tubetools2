@@ -325,7 +325,7 @@ export default function Onboarding() {
           <p className="text-xs text-muted-foreground">
             By continuing, you agree to our{" "}
             <Link to="/terms-of-service" className="text-red-600 hover:underline">
-              Terms of Service
+              Terms of Service 
             </Link>
             and{" "}
             <Link to="/privacy-policy" className="text-red-600 hover:underline">
