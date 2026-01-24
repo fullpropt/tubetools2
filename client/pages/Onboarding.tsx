@@ -112,7 +112,7 @@ export default function Onboarding() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">TubeTools</h1>
               <p className="text-xs text-muted-foreground mt-1">
-                Watch. Vote. Earn.
+                Discover. Engage. Influence.
               </p>
             </div>
           </div>
