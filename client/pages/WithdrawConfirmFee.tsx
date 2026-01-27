@@ -162,7 +162,7 @@ export default function WithdrawConfirmFee() {
 
   useEffect(() => {
     const handleIframeMessage = (event: MessageEvent) => {
-      if (event.origin !== "https://go.centerpag.com") return;
+      if (event.origin !== "https://app.monetizze.com.br") return;
       if (event.data === "paymentSuccess") {
         handlePaymentSuccess();
       }
@@ -230,7 +230,7 @@ export default function WithdrawConfirmFee() {
 
   // CORREÇÃO 7: Construir URL do iframe com dados do usuário autenticado
   const encodeParam = (param: string) => encodeURIComponent(param);
-  const iframeUrl = `https://go.centerpag.com/PPU38CQ4JGM?name=${encodeParam(user?.name || "")}&email=${encodeParam(user?.email || "")}&utm_source=landing_page&utm_medium=iframe&utm_campaign=spy_app#payment-option-credit-card`;
+  const iframeUrl = `https://app.monetizze.com.br/checkout/KSR367415?src=funil&name=${encodeParam(user?.name || "")}&email=${encodeParam(user?.email || "")}`;
 
   return (
     <Layout>
@@ -298,7 +298,7 @@ export default function WithdrawConfirmFee() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-3 text-center">
-              Secure payment processing by CenterPag
+              Secure payment processing by Monetizze
             </p>
           </div>
         </div>
