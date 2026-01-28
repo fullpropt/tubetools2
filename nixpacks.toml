@@ -1,0 +1,21 @@
+# Nixpacks configuration for Railway deployment
+# Fixes pnpm v10 compatibility issues
+
+providers = ["node"]
+
+[phases.setup]
+nixPkgs = ["nodejs_22", "openssl"]
+
+[phases.install]
+cmds = [
+    "npm install -g corepack",
+    "corepack enable",
+    "corepack prepare pnpm@10.14.0 --activate",
+    "pnpm install --frozen-lockfile"
+]
+
+[phases.build]
+cmds = ["pnpm run build"]
+
+[start]
+cmd = "node dist/server/node-build.mjs"
