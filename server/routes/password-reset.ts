@@ -13,47 +13,7 @@ import {
   updatePasswordByEmail
 } from "../user-db";
 import { generateResetToken, hashPassword, validatePasswordStrength } from "../password-utils";
-
-/**
- * Envia email de recuperação de senha via Mail MKT API
- */
-async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
-  try {
-    const mailMktUrl = process.env.MAIL_MKT_URL || 'https://leads-email-dashboard-production.up.railway.app';
-    const apiUrl = `${mailMktUrl}/api/trpc/passwordReset.sendResetEmail`;
-
-    console.log(`[sendPasswordResetEmail] Sending request to Mail MKT: ${apiUrl}`);
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        json: {
-          email: email,
-          resetToken: resetToken,
-          appName: 'TubeTools'
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[sendPasswordResetEmail] Mail MKT API error: ${response.status}`);
-      console.error(`[sendPasswordResetEmail] Response: ${errorText}`);
-      return false;
-    }
-
-    const result = await response.json();
-    console.log(`[sendPasswordResetEmail] Mail MKT response:`, result);
-
-    return result.result?.data?.success === true;
-  } catch (error) {
-    console.error('[sendPasswordResetEmail] Error calling Mail MKT API:', error);
-    return false;
-  }
-}
+import { sendPasswordResetEmail } from "../email-service";
 
 /**
  * Handle forgot password request
@@ -106,8 +66,8 @@ export const handleForgotPassword: RequestHandler = async (req, res) => {
 
     console.log(`[handleForgotPassword] Reset token generated for ${trimmedEmail}`);
 
-    // Enviar email via Mail MKT API
-    const emailSent = await sendPasswordResetEmail(trimmedEmail, resetToken);
+    // Enviar email via serviço de e-mail (Hostinger/Mailgun)
+    const emailSent = await sendPasswordResetEmail(user.profile, resetToken);
 
     if (!emailSent) {
       console.warn(`[handleForgotPassword] Failed to send email to ${trimmedEmail}`);

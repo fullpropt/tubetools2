@@ -10,7 +10,8 @@ const port = process.env.PORT || 3000;
 const distPath = path.join(__dirname, "dist/spa");
 
 // Import all route handlers directly
-import { handleSignup, handleLogin, handleUpdateName } from "./server/routes/auth.ts";
+import { handleSignup, handleLogin, handleUpdateName, handleChangePassword, handleDeleteAccount } from "./server/routes/auth.ts";
+import { handleForgotPassword, handleResetPassword } from "./server/routes/password-reset.ts";
 import {
   handleGetVideos,
   handleGetVideo,
@@ -49,6 +50,10 @@ function createServer() {
   app.post(["/auth/signup", "/api/auth/signup"], handleSignup);
   app.post(["/auth/login", "/api/auth/login"], handleLogin);
   app.post(["/auth/update-name", "/api/auth/update-name"], handleUpdateName);
+  app.post(["/auth/forgot-password", "/api/auth/forgot-password"], handleForgotPassword);
+  app.post(["/auth/reset-password", "/api/auth/reset-password"], handleResetPassword);
+  app.post(["/auth/change-password", "/api/auth/change-password"], handleChangePassword);
+  app.post(["/auth/delete-account", "/api/auth/delete-account"], handleDeleteAccount);
 
   // Video routes
   app.get(["/videos", "/api/videos"], handleGetVideos);
