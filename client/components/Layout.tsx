@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser, clearAuth } from "@/lib/auth";
 import { LogOut, Play, Wallet } from "lucide-react";
 import Footer from "@/components/Footer";
+import AnnouncementBanner from "@/components/AnnouncementBanner";
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,6 +43,15 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      {/* Announcement Banner */}
+      {user && (
+        <AnnouncementBanner
+          id="withdrawal-update-2026-01"
+          message="Platform Update: We've extended the withdrawal period to 50 days to improve reward sustainability. Thank you for being part of TubeTools!"
+          type="info"
+        />
+      )}
+
       {/* Header/Navigation */}
       {!hideNav && user && (
         <>
