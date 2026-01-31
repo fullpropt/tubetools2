@@ -5,8 +5,8 @@ export const DAILY_GOAL_VIDEO_COUNT = 3;
 export const DAILY_CHECKIN_BONUS = 0.5;
 
 // Vote rewards
-export const VOTE_REWARD_MIN = 0.3;
-export const VOTE_REWARD_MAX = 27.0;
+export const VOTE_REWARD_MIN = 0.5;
+export const VOTE_REWARD_MAX = 3.0;
 
 // Video requirements
 export const VIDEO_MIN_WATCH_SECONDS = 4;

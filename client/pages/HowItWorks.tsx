@@ -75,7 +75,7 @@ export default function HowItWorks() {
               <h2 className="text-2xl font-bold">4. Withdraw Earnings</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              After 20 days of continuous access, your balance will become available for withdrawal. You can submit your withdrawal request in the 'Balance' section by providing your bank details for the transfer.
+              After 50 days of continuous access, your balance will become available for withdrawal. You can submit your withdrawal request in the 'Balance' section by providing your bank details for the transfer.
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function HowItWorks() {
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Withdrawals are only allowed starting from $150. After making a withdrawal, you can request another one only after completing another 20 consecutive days.</span>
+              <span>Withdrawals are only allowed starting from $150. After making a withdrawal, you can request another one only after completing another 50 consecutive days.</span>
             </li>
           </ul>
         </div>

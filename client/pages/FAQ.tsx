@@ -20,7 +20,7 @@ export default function FAQ() {
       id: "1",
       question: "How much can I earn?",
       answer:
-        "Your earnings depend on how many videos you watch and vote on. Each completed video typically pays between $0.30 and $27.00. The more videos you watch, the more you can earn, while respecting the limit of 10 videos per day.",
+        "Your earnings depend on how many videos you watch and vote on. Each completed video typically pays between $0.50 and $3.00. The more videos you watch, the more you can earn, while respecting the limit of 10 videos per day.",
     },
     {
       id: "2",

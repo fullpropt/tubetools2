@@ -500,21 +500,21 @@ export default function Feed() {
                       </p>
                     </div>
                     <p className="text-sm font-bold text-purple-600">
-                      {votingDaysCount} / 20 days
+                      {votingDaysCount} / 50 days
                     </p>
                   </div>
                   <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out rounded-full"
                       style={{
-                        width: `${Math.min((votingDaysCount / 20) * 100, 100)}%`,
+                        width: `${Math.min((votingDaysCount / 50) * 100, 100)}%`,
                       }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {votingDaysCount >= 20
+                    {votingDaysCount >= 50
                       ? "🎉 Goal achieved! Keep the streak going!"
-                      : `${20 - votingDaysCount} more days to reach your goal`}
+                      : `${50 - votingDaysCount} more days to reach your goal`}
                   </p>
                 </div>
               </div>

@@ -30,9 +30,9 @@ function calculateRewards(durationSeconds: number): { min: number; max: number }
   // Normalize duration to 0.5-10 minute range for multiplier calculation
   const durationMinutes = Math.min(10, Math.max(0.5, durationSeconds / 60));
   
-  // Base rewards: average around $15-$27
-  const baseMin = 15.00;
-  const baseMax = 27.00;
+  // Base rewards: average around $0.50-$3.00
+  const baseMin = 0.50;
+  const baseMax = 3.00;
   
   // Multiplier varies based on duration (0.5 to 1.5)
   // This creates variation while keeping average in target range

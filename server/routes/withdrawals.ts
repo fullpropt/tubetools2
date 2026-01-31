@@ -49,8 +49,8 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
 
     const user = userData.profile;
 
-    // REGRA DE NEGÓCIO: Exigir 20 dias consecutivos de votação
-    const REQUIRED_STREAK = 20;
+    // REGRA DE NEGÓCIO: Exigir 50 dias consecutivos de votação
+    const REQUIRED_STREAK = 50;
     if (user.votingStreak < REQUIRED_STREAK) {
       res.status(400).json({
         error: `You need ${REQUIRED_STREAK} consecutive days of voting to withdraw. Current: ${user.votingStreak} days.`,

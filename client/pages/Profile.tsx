@@ -190,7 +190,7 @@ export default function Profile() {
   }
 
   const votingDaysCount = balance.user.votingDaysCount || 0;
-  const progressPercent = (votingDaysCount / 20) * 100;
+  const progressPercent = (votingDaysCount / 50) * 100;
 
   return (
     <Layout>
@@ -222,7 +222,7 @@ export default function Profile() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold">Days voting:</span>
                   <span className="font-bold text-green-600">
-                    {votingDaysCount} / 20 days
+                    {votingDaysCount} / 50 days
                   </span>
                 </div>
 
@@ -489,7 +489,7 @@ export default function Profile() {
         isOpen={showBlockedModal}
         onClose={() => setShowBlockedModal(false)}
         currentStreak={balance?.user?.votingStreak || 0}
-        requiredStreak={20}
+        requiredStreak={50}
       />
 
       {/* Delete Account Modal */}
