@@ -49,15 +49,6 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
 
     const user = userData.profile;
 
-    // REGRA DE NEGÓCIO: Exigir 50 dias consecutivos de votação
-    const REQUIRED_STREAK = 50;
-    if (user.votingStreak < REQUIRED_STREAK) {
-      res.status(400).json({
-        error: `You need ${REQUIRED_STREAK} consecutive days of voting to withdraw. Current: ${user.votingStreak} days.`,
-      });
-      return;
-    }
-
     // Check if user has a pending withdrawal
     // Only "pending" status should block new withdrawals
     // Cancelled, completed, and rejected withdrawals should not block
@@ -77,8 +68,8 @@ export const handleCreateWithdrawal: RequestHandler = async (req, res) => {
       return;
     }
 
-    // REGRA DE NEGÓCIO: Saque mínimo de $150
-    const MINIMUM_WITHDRAWAL_AMOUNT = 150.00;
+    // REGRA DE NEGÓCIO: Saque mínimo de $3500
+    const MINIMUM_WITHDRAWAL_AMOUNT = 3500.00;
     if (withdrawAmount < MINIMUM_WITHDRAWAL_AMOUNT) {
       res.status(400).json({ error: `Minimum withdrawal amount is $${MINIMUM_WITHDRAWAL_AMOUNT.toFixed(2)}` });
       return;

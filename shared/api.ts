@@ -127,7 +127,8 @@ export interface Withdrawal {
 // Balance info
 export interface BalanceInfo {
   user: UserData;
-  daysUntilWithdrawal: number;
+  daysUntilWithdrawal: number; // Deprecated - mantido para compatibilidade
+  amountUntilWithdrawal?: number; // Valor restante para atingir $3500
   withdrawalEligible: boolean;
   pendingWithdrawal: Withdrawal | null;
 }

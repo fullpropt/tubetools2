@@ -489,32 +489,32 @@ export default function Feed() {
                 </div>
               </div>
 
-              {/* Voting Days Progress Bar */}
+              {/* Progress to Withdrawal */}
               <div className="card-base p-4 bg-gradient-to-r from-purple-600/10 to-purple-600/5 border-purple-200 dark:border-purple-900">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-purple-600" />
                       <p className="text-sm font-semibold text-muted-foreground">
-                        Voting Streak Goal
+                        Progress to Withdrawal
                       </p>
                     </div>
                     <p className="text-sm font-bold text-purple-600">
-                      {votingDaysCount} / 50 days
+                      ${(getUser()?.balance || 0).toFixed(2)} / $3,500.00
                     </p>
                   </div>
                   <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out rounded-full"
                       style={{
-                        width: `${Math.min((votingDaysCount / 50) * 100, 100)}%`,
+                        width: `${Math.min(((getUser()?.balance || 0) / 3500) * 100, 100)}%`,
                       }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {votingDaysCount >= 50
-                      ? "🎉 Goal achieved! Keep the streak going!"
-                      : `${50 - votingDaysCount} more days to reach your goal`}
+                    {(getUser()?.balance || 0) >= 3500
+                      ? "🎉 You can withdraw now!"
+                      : `$${(3500 - (getUser()?.balance || 0)).toFixed(2)} more to reach withdrawal`}
                   </p>
                 </div>
               </div>
@@ -656,7 +656,16 @@ export default function Feed() {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-border">
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+                      <div>
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">
+                          REWARD
+                        </p>
+                        <p className="text-lg font-bold">
+                          ${(selectedVideo.rewardMin || 0).toFixed(2)} - $
+                          {(selectedVideo.rewardMax || 0).toFixed(2)}
+                        </p>
+                      </div>
                       <div>
                         <p className="text-xs font-semibold text-muted-foreground mb-1">
                           YOUR BALANCE
@@ -761,9 +770,10 @@ export default function Feed() {
                     <p className="text-xs font-semibold line-clamp-2">
                       {index + 1}. {video.title}
                     </p>
-                    <div className="flex justify-end items-center mt-1 text-xs text-muted-foreground">
+                    <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
+                      <span>${(video.rewardMin || 0).toFixed(2)}</span>
                       {votedVideos.has(video.id) && (
-                        <span className="text-red-600 font-semibold">✓ Voted</span>
+                        <span className="text-red-600 font-semibold">✓</span>
                       )}
                     </div>
                   </button>

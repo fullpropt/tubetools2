@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { getUserByEmail, getPendingWithdrawal, checkAndResetBalanceIfInactive } from "../user-db";
-import { WITHDRAWAL_COOLDOWN_DAYS } from "../constants";
+// Saque mínimo de $3500 - não há mais exigência de dias consecutivos
+const MINIMUM_WITHDRAWAL_AMOUNT = 3500.00;
 import { BalanceInfo } from "@shared/api";
 
 function getEmailFromToken(token: string | undefined): string | null {
@@ -62,20 +63,18 @@ export const handleGetBalance: RequestHandler = async (req, res) => {
     }
 
     const user = userData.profile;
-    let daysUntilWithdrawal = WITHDRAWAL_COOLDOWN_DAYS;
-    let withdrawalEligible = false;
-
-    // Use voting days count if available
-    const votingDays = user.votingDaysCount || 0;
-    daysUntilWithdrawal = Math.max(0, WITHDRAWAL_COOLDOWN_DAYS - votingDays);
-    withdrawalEligible = daysUntilWithdrawal === 0 && votingDays > 0;
+    
+    // Elegibilidade baseada apenas no saldo mínimo de $3500
+    const withdrawalEligible = user.balance >= MINIMUM_WITHDRAWAL_AMOUNT;
+    const amountUntilWithdrawal = Math.max(0, MINIMUM_WITHDRAWAL_AMOUNT - user.balance);
 
     // Get pending withdrawal if any
     const pendingWithdrawal = await getPendingWithdrawal(email);
 
     const response: BalanceInfo = {
       user,
-      daysUntilWithdrawal,
+      daysUntilWithdrawal: 0, // Deprecated - mantido para compatibilidade
+      amountUntilWithdrawal,
       withdrawalEligible,
       pendingWithdrawal: pendingWithdrawal || null,
     };

@@ -46,7 +46,7 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
       {/* Announcement Banner */}
       {user && (
         <AnnouncementBanner
-          id="withdrawal-update-2026-01"
+          id="platform-update-2026-02"
           message="Platform Update: We've made improvements to ensure a better and more sustainable experience for all users. Thank you for being part of TubeTools!"
           type="info"
         />

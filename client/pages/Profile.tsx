@@ -189,8 +189,11 @@ export default function Profile() {
     );
   }
 
-  const votingDaysCount = balance.user.votingDaysCount || 0;
-  const progressPercent = (votingDaysCount / 50) * 100;
+  // Progresso baseado no saldo mínimo de $3500
+  const MINIMUM_WITHDRAWAL = 3500;
+  const currentBalance = user?.balance || 0;
+  const progressPercent = Math.min((currentBalance / MINIMUM_WITHDRAWAL) * 100, 100);
+  const amountRemaining = Math.max(0, MINIMUM_WITHDRAWAL - currentBalance);
 
   return (
     <Layout>
@@ -220,9 +223,9 @@ export default function Profile() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold">Days voting:</span>
+                  <span className="font-semibold">Progress to withdrawal:</span>
                   <span className="font-bold text-green-600">
-                    {votingDaysCount} / 50 days
+                    ${currentBalance.toFixed(2)} / $3,500.00
                   </span>
                 </div>
 
@@ -237,9 +240,7 @@ export default function Profile() {
                 <p className="text-xs text-muted-foreground">
                   {balance.withdrawalEligible
                     ? "✓ You can withdraw now!"
-                    : `You'll be able to withdraw in ${balance.daysUntilWithdrawal} day${
-                        balance.daysUntilWithdrawal !== 1 ? "s" : ""
-                      }`}
+                    : `You need $${amountRemaining.toFixed(2)} more to withdraw`}
                 </p>
               </div>
 
