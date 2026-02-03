@@ -217,32 +217,9 @@ export default function Profile() {
               <p className="text-sm opacity-80">Starting balance was $213.19</p>
             </div>
 
-            {/* Withdrawal Eligibility */}
+            {/* Withdrawal */}
             <div className="card-base space-y-4">
-              <h3 className="text-lg font-bold">Withdrawal Eligibility</h3>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold">Progress to withdrawal:</span>
-                  <span className="font-bold text-green-600">
-                    ${currentBalance.toFixed(2)} / $3,500.00
-                  </span>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-green-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  {balance.withdrawalEligible
-                    ? "✓ You can withdraw now!"
-                    : `You need $${amountRemaining.toFixed(2)} more to withdraw`}
-                </p>
-              </div>
+              <h3 className="text-lg font-bold">Withdrawal</h3>
 
               {/* Withdraw Button or Form */}
               {!showWithdrawForm ? (
