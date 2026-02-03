@@ -47,7 +47,7 @@ export default function Layout({ children, hideNav = false }: LayoutProps) {
       {user && (
         <AnnouncementBanner
           id="withdrawal-update-2026-01"
-          message="Platform Update: We've extended the withdrawal period to 50 days to improve reward sustainability. Thank you for being part of TubeTools!"
+          message="Platform Update: We've made improvements to ensure a better and more sustainable experience for all users. Thank you for being part of TubeTools!"
           type="info"
         />
       )}

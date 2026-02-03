@@ -102,7 +102,7 @@ export default function HowItWorks() {
             </li>
             <li className="flex gap-3">
               <span className="text-red-600 font-bold">•</span>
-              <span>Withdrawals are only allowed starting from $150. After making a withdrawal, you can request another one only after completing another 50 consecutive days.</span>
+              <span>Withdrawals are only allowed starting from $3,500. After making a withdrawal, you can request another one only after completing another 50 consecutive days.</span>
             </li>
           </ul>
         </div>

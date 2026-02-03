@@ -24,6 +24,41 @@ function getEmailFromToken(token: string | undefined): string | null {
   }
 }
 
+/**
+ * Calcula a recompensa baseada no dia consecutivo do usuário.
+ * Dia 1: média ~$7.00 (range $6.00-$8.00)
+ * Dia 50: média ~$0.50 (range $0.30-$0.70)
+ * 
+ * A progressão é linear decrescente para que em 50 dias,
+ * com 10 vídeos/dia, o usuário acumule aproximadamente $3,287
+ * (chegando a ~$3,500 com saldo inicial de $213)
+ */
+function calculateDecreasingReward(votingDaysCount: number): { min: number; max: number; average: number } {
+  // Limitar entre dia 1 e dia 50
+  const day = Math.max(1, Math.min(50, votingDaysCount));
+  
+  // Recompensa média no dia 1: $7.00
+  // Recompensa média no dia 50: $0.50
+  // Progressão linear decrescente
+  const startAverage = 7.00;
+  const endAverage = 0.50;
+  
+  // Calcular média para o dia atual (interpolação linear)
+  const progress = (day - 1) / 49; // 0 no dia 1, 1 no dia 50
+  const currentAverage = startAverage - (progress * (startAverage - endAverage));
+  
+  // Variação de ±15% em torno da média
+  const variation = 0.15;
+  const min = roundToTwoDecimals(currentAverage * (1 - variation));
+  const max = roundToTwoDecimals(currentAverage * (1 + variation));
+  
+  return { 
+    min, 
+    max, 
+    average: roundToTwoDecimals(currentAverage) 
+  };
+}
+
 async function resetDailyCountersIfNeeded(user: any) {
   const now = new Date();
   const lastReset = user.last_daily_reset ? new Date(user.last_daily_reset) : new Date(0);
@@ -154,61 +189,62 @@ export const handleVote: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Invalid vote type" });
     }
 
+    // Buscar vídeo do banco (apenas para título e thumbnail)
     const videoQuery = await executeQuery('SELECT * FROM videos WHERE id = $1', [id]);
-    let rewardMin = 0.5, rewardMax = 3.0, videoTitle = "YouTube Video";
+    let videoTitle = "YouTube Video";
     let videoThumbnail = '';
     let videoUrl = `https://www.youtube.com/watch?v=${id}`;
 
     if (videoQuery.rows.length > 0) {
       const video = videoQuery.rows[0];
-      rewardMin = parseFloat(video.reward_min);
-      rewardMax = parseFloat(video.reward_max);
       videoTitle = video.title;
+      videoThumbnail = video.thumbnail || '';
     } else {
       console.log(`[Vote] Video ${id} not found in DB, fetching details from YouTube API...`);
       const youtubeVideo = await getVideoDetails(id);
       if (youtubeVideo) {
-        rewardMin = youtubeVideo.rewardMin;
-        rewardMax = youtubeVideo.rewardMax;
         videoTitle = youtubeVideo.title;
         videoThumbnail = youtubeVideo.thumbnail || '';
-        console.log(`[Vote] Fetched YouTube video details. Reward range: ${rewardMin} - ${rewardMax}`);
         
-        // ===== CORREÇÃO: Inserir o vídeo do YouTube no banco para evitar FK constraint error =====
+        // Inserir o vídeo do YouTube no banco
         try {
           await executeQuery(
             `INSERT INTO videos (id, title, description, url, thumbnail, reward_min, reward_max, duration, created_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
              ON CONFLICT (id) DO NOTHING`,
-            [id, videoTitle, '', videoUrl, videoThumbnail, rewardMin, rewardMax, 180]
+            [id, videoTitle, '', videoUrl, videoThumbnail, 0, 0, 180]
           );
           console.log(`[Vote] Video ${id} inserted into database`);
         } catch (insertErr) {
           console.error(`[Vote] Failed to insert video ${id}:`, insertErr);
-          // Continuar mesmo se falhar - o voto ainda pode funcionar se o vídeo já existe
         }
-        // ===== FIM DA CORREÇÃO =====
       } else {
-        console.warn(`[Vote] Could not fetch details for video ${id}. Using default rewards.`);
+        console.warn(`[Vote] Could not fetch details for video ${id}. Using default title.`);
         
-        // ===== CORREÇÃO: Inserir vídeo com dados padrão se não conseguir buscar do YouTube =====
+        // Inserir vídeo com dados padrão
         try {
           await executeQuery(
             `INSERT INTO videos (id, title, description, url, thumbnail, reward_min, reward_max, duration, created_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
              ON CONFLICT (id) DO NOTHING`,
-            [id, videoTitle, '', videoUrl, '', rewardMin, rewardMax, 180]
+            [id, videoTitle, '', videoUrl, '', 0, 0, 180]
           );
           console.log(`[Vote] Video ${id} inserted with default values`);
         } catch (insertErr) {
           console.error(`[Vote] Failed to insert video ${id}:`, insertErr);
         }
-        // ===== FIM DA CORREÇÃO =====
       }
     }
 
-    const reward = roundToTwoDecimals(Math.random() * (rewardMax - rewardMin) + rewardMin);
+    // NOVA LÓGICA: Calcular recompensa baseada no dia consecutivo do usuário
+    const votingDaysCount = user.voting_days_count || 1;
+    const rewardRange = calculateDecreasingReward(votingDaysCount);
+    
+    // Gerar recompensa aleatória dentro do range calculado
+    const reward = roundToTwoDecimals(Math.random() * (rewardRange.max - rewardRange.min) + rewardRange.min);
     const newBalance = roundToTwoDecimals(parseFloat(user.balance) + reward);
+
+    console.log(`[Vote] User ${email} on day ${votingDaysCount}. Reward range: $${rewardRange.min}-$${rewardRange.max}. Actual reward: $${reward}`);
 
     // Atualizar contadores e saldo em uma única transação
     await executeQuery(
