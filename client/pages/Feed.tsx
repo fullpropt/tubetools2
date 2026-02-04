@@ -627,16 +627,8 @@ export default function Feed() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">
-                          REWARD
-                        </p>
-                        <p className="text-lg font-bold">
-                          ${(selectedVideo.rewardMin || 0).toFixed(2)} - $
-                          {(selectedVideo.rewardMax || 0).toFixed(2)}
-                        </p>
-                      </div>
+                    {/* Only show balance, not reward values */}
+                    <div className="pt-4 border-t border-border">
                       <div>
                         <p className="text-xs font-semibold text-muted-foreground mb-1">
                           YOUR BALANCE
@@ -742,9 +734,9 @@ export default function Feed() {
                       {index + 1}. {video.title}
                     </p>
                     <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
-                      <span>${(video.rewardMin || 0).toFixed(2)}</span>
+                      {/* Removed reward value display */}
                       {votedVideos.has(video.id) && (
-                        <span className="text-red-600 font-semibold">✓</span>
+                        <span className="text-red-600 font-semibold">✓ Voted</span>
                       )}
                     </div>
                   </button>
