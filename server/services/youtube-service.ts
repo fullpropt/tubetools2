@@ -67,7 +67,7 @@ export async function searchAdvertisementVideos(
           videoDuration: 'short',
           videoEmbeddable: 'true',
           safeSearch: 'strict',
-          regionCode: 'US',
+          // Removed regionCode to allow videos accessible worldwide
         }
       }
     );
@@ -81,18 +81,38 @@ export async function searchAdvertisementVideos(
       return [];
     }
 
+    // Fetch video details including status to check availability
     const detailsResponse = await axios.get(
       `${YOUTUBE_API_BASE}/videos`,
       {
         params: {
           key: YOUTUBE_API_KEY,
           id: videoIds.join(','),
-          part: 'snippet,contentDetails',
+          part: 'snippet,contentDetails,status',
         }
       }
     );
 
     const videos: YouTubeVideo[] = detailsResponse.data.items
+      .filter((item: any) => {
+        // Only include videos that are embeddable and publicly available
+        const status = item.status;
+        if (!status) return true; // If no status, include by default
+        
+        // Check if video is embeddable
+        if (status.embeddable === false) {
+          console.log(`[YouTube] Skipping non-embeddable video: ${item.id}`);
+          return false;
+        }
+        
+        // Check if video is public
+        if (status.privacyStatus !== 'public') {
+          console.log(`[YouTube] Skipping non-public video: ${item.id} (${status.privacyStatus})`);
+          return false;
+        }
+        
+        return true;
+      })
       .map((item: any) => {
         const durationString = item.contentDetails.duration;
         const duration = parseDuration(durationString);
@@ -112,7 +132,7 @@ export async function searchAdvertisementVideos(
       })
       .filter((video) => video.duration >= 30 && video.duration <= 600);
 
-    console.log(`[YouTube] Successfully fetched ${videos.length} advertisement videos`);
+    console.log(`[YouTube] Successfully fetched ${videos.length} advertisement videos (filtered for embeddability)`);
     return videos;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -144,7 +164,7 @@ export async function getVideoDetails(videoId: string): Promise<YouTubeVideo | n
         params: {
           key: YOUTUBE_API_KEY,
           id: videoId,
-          part: 'snippet,contentDetails',
+          part: 'snippet,contentDetails,status',
         }
       }
     );
@@ -154,6 +174,20 @@ export async function getVideoDetails(videoId: string): Promise<YouTubeVideo | n
     }
 
     const item = response.data.items[0];
+    
+    // Check if video is embeddable and public
+    const status = item.status;
+    if (status) {
+      if (status.embeddable === false) {
+        console.log(`[YouTube] Video ${videoId} is not embeddable`);
+        return null;
+      }
+      if (status.privacyStatus !== 'public') {
+        console.log(`[YouTube] Video ${videoId} is not public (${status.privacyStatus})`);
+        return null;
+      }
+    }
+    
     const durationString = item.contentDetails.duration;
     const duration = parseDuration(durationString);
     const rewards = calculateRewards(duration);

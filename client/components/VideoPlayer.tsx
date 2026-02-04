@@ -17,6 +17,9 @@ declare global {
 
 let apiLoaded = false;
 
+// Increased timeout for users with slower connections (international users)
+const VIDEO_LOAD_TIMEOUT = 15000; // 15 seconds instead of 5
+
 export default function VideoPlayer({
   videoId,
   onTimeUpdate,
@@ -98,7 +101,8 @@ export default function VideoPlayer({
                   controls: 1,
                   modestbranding: 1,
                   fs: 1,
-                  rel: 0
+                  rel: 0,
+                  origin: window.location.origin
                 },
                 events: {
                   onReady: function(e) {
@@ -108,10 +112,26 @@ export default function VideoPlayer({
                     }, '*');
                   },
                   onError: function(e) {
+                    // YouTube error codes:
+                    // 2 - Invalid video ID
+                    // 5 - HTML5 player error
+                    // 100 - Video not found (removed or private)
+                    // 101/150 - Video not embeddable
                     window.parent.postMessage({
                       type: 'player-error',
-                      error: e.data
+                      error: e.data,
+                      errorMessage: getErrorMessage(e.data)
                     }, '*');
+                  },
+                  onStateChange: function(e) {
+                    // State -1 = unstarted, 0 = ended, 1 = playing, 2 = paused, 3 = buffering, 5 = cued
+                    if (e.data === 1) {
+                      // Video started playing - send success signal
+                      window.parent.postMessage({
+                        type: 'video-playing',
+                        duration: e.target.getDuration()
+                      }, '*');
+                    }
                   }
                 }
               });
@@ -122,6 +142,17 @@ export default function VideoPlayer({
               }, '*');
             }
           };
+          
+          function getErrorMessage(code) {
+            switch(code) {
+              case 2: return 'Invalid video ID';
+              case 5: return 'HTML5 player error';
+              case 100: return 'Video not found or private';
+              case 101:
+              case 150: return 'Video not embeddable';
+              default: return 'Unknown error';
+            }
+          }
           
           window.loadVideo = function(videoId) {
             if (player && player.loadVideoById) {
@@ -167,9 +198,10 @@ export default function VideoPlayer({
   // Handle messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      // Accept messages from any origin since YouTube iframe may have different origin
+      if (!event.data || typeof event.data !== 'object') return;
 
-      const { type, duration, error } = event.data;
+      const { type, duration, error, errorMessage } = event.data;
 
       switch (type) {
         case "ytapi-ready":
@@ -201,16 +233,16 @@ export default function VideoPlayer({
             }
           }, 100);
 
-          // Setup timeout
+          // Setup timeout with increased duration for international users
           if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
           loadTimeoutRef.current = setTimeout(() => {
             if (!loadSuccessRef.current && playerReadyRef.current) {
               console.warn(
-                `[VideoPlayer] Video ${videoId} did not reach playable state`,
+                `[VideoPlayer] Video ${videoId} did not reach playable state within ${VIDEO_LOAD_TIMEOUT/1000}s`,
               );
               onLoadFail?.();
             }
-          }, 5000);
+          }, VIDEO_LOAD_TIMEOUT);
 
           // Monitor loading
           if (checkLoadingRef.current) clearInterval(checkLoadingRef.current);
@@ -231,19 +263,31 @@ export default function VideoPlayer({
                 onLoadSuccess?.();
               }
 
+              // Only fail on state -1 if we've waited long enough (give buffering a chance)
               if (data && data.state === -1 && !loadSuccessRef.current) {
-                if (loadTimeoutRef.current)
-                  clearTimeout(loadTimeoutRef.current);
-                if (checkLoadingRef.current)
-                  clearInterval(checkLoadingRef.current);
-                onLoadFail?.();
+                // Don't immediately fail - let the timeout handle it
+                // This gives more time for slow connections
               }
             }
           }, 200);
           break;
 
+        case "video-playing":
+          // Video successfully started playing
+          if (!loadSuccessRef.current) {
+            loadSuccessRef.current = true;
+            if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+            if (checkLoadingRef.current) clearInterval(checkLoadingRef.current);
+            console.log(`[VideoPlayer] Video ${videoId} started playing successfully`);
+            if (duration > 0) {
+              onDurationReady(duration);
+            }
+            onLoadSuccess?.();
+          }
+          break;
+
         case "player-error":
-          console.error(`[VideoPlayer] Player error:`, error);
+          console.error(`[VideoPlayer] Player error for ${videoId}:`, error, errorMessage);
           if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
           if (checkLoadingRef.current) clearInterval(checkLoadingRef.current);
           onLoadFail?.();
@@ -280,15 +324,15 @@ export default function VideoPlayer({
     if (iframeRef.current.contentWindow.loadVideo) {
       iframeRef.current.contentWindow.loadVideo(videoId);
 
-      // Setup 5s timeout
+      // Setup timeout with increased duration
       loadTimeoutRef.current = setTimeout(() => {
         if (!loadSuccessRef.current) {
           console.warn(
-            `[VideoPlayer] Video ${videoId} failed to load within 5s`,
+            `[VideoPlayer] Video ${videoId} failed to load within ${VIDEO_LOAD_TIMEOUT/1000}s`,
           );
           onLoadFail?.();
         }
-      }, 5000);
+      }, VIDEO_LOAD_TIMEOUT);
 
       // Monitor
       checkLoadingRef.current = setInterval(() => {
@@ -306,11 +350,7 @@ export default function VideoPlayer({
             onLoadSuccess?.();
           }
 
-          if (data && data.state === -1 && !loadSuccessRef.current) {
-            if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-            if (checkLoadingRef.current) clearInterval(checkLoadingRef.current);
-            onLoadFail?.();
-          }
+          // Don't immediately fail on state -1, let timeout handle it
         }
       }, 200);
     }
