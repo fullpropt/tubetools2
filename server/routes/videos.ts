@@ -29,9 +29,9 @@ function getEmailFromToken(token: string | undefined): string | null {
  * Dia 1: média ~$7.00 (range $6.00-$8.00)
  * Dia 50: média ~$0.50 (range $0.30-$0.70)
  * 
- * A progressão é linear decrescente para que em 50 dias,
- * com 10 vídeos/dia, o usuário acumule aproximadamente $3,287
- * (chegando a ~$3,500 com saldo inicial de $213)
+ * A progressão é linear decrescente.
+ * Em 50 dias com 10 votos/dia, a expectativa é ~US$1,875 em ganhos
+ * (antes de regras como reset por inatividade).
  */
 function calculateDecreasingReward(votingDaysCount: number): { min: number; max: number; average: number } {
   // Limitar entre dia 1 e dia 50

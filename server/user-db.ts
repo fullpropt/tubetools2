@@ -175,7 +175,7 @@ export async function createUser(
   id: string,
   name: string,
   email: string,
-  initialBalance: number = 213.19,
+  initialBalance: number = 213.91,
   passwordHash?: string,
 ): Promise<UserData> {
   const normalizedEmail = email.toLowerCase().trim();

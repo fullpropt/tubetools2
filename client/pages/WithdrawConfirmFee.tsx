@@ -69,23 +69,14 @@ export default function WithdrawConfirmFee() {
           return;
         }
 
-        // CORREÇÃO IMPORTANTE: Se o status for "completed", chamar simulate-fee-payment e redirecionar
+        // Se o saque já estiver completed, apenas redireciona.
         if (currentWithdrawal.status === "completed") {
-          try {
-            await apiPost("/withdrawals/simulate-fee-payment", { withdrawalId });
-            // Atualizar saldo do usuário no localStorage
-            await updateUserBalance();
-            navigate(`/withdraw/success/${withdrawalId}`);
-            return;
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to process completed withdrawal");
-            setLoading(false);
-            return;
-          }
+          await updateUserBalance();
+          navigate(`/withdraw/success/${withdrawalId}`);
+          return;
         }
 
-        // CORREÇÃO 3: Validar status do saque - agora permite pending e completed
-        if (currentWithdrawal.status !== "pending" && currentWithdrawal.status !== "completed") {
+        if (currentWithdrawal.status !== "pending") {
           setError(`This withdrawal cannot be processed. Current status: ${currentWithdrawal.status}`);
           setLoading(false);
           return;
@@ -154,6 +145,7 @@ export default function WithdrawConfirmFee() {
   const handlePaymentSuccess = async () => {
     try {
       await apiPost("/withdrawals/simulate-fee-payment", { withdrawalId });
+      await updateUserBalance();
       navigate(`/withdraw/success/${withdrawalId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to finalize withdrawal");

@@ -1,5 +1,5 @@
 // System constants
-export const SYSTEM_STARTING_BALANCE = 213.19;
+export const SYSTEM_STARTING_BALANCE = 213.91;
 export const WITHDRAWAL_COOLDOWN_DAYS = 0;
 export const DAILY_GOAL_VIDEO_COUNT = 3;
 export const DAILY_CHECKIN_BONUS = 0.5;

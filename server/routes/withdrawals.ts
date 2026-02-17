@@ -257,8 +257,19 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
 
     const withdrawal = userData.withdrawals.find((w) => w.id === withdrawalId);
 
-    if (!withdrawal || (withdrawal.status !== "pending" && withdrawal.status !== "completed")) {
+    if (!withdrawal) {
       res.status(400).json({ error: "Invalid withdrawal ID" });
+      return;
+    }
+
+    // Idempotency guard: if this withdrawal has already been processed, do nothing.
+    if (withdrawal.status === "completed") {
+      res.json({ success: true, withdrawalId, alreadyProcessed: true });
+      return;
+    }
+
+    if (withdrawal.status !== "pending") {
+      res.status(400).json({ error: "Invalid or non-pending withdrawal ID" });
       return;
     }
 
@@ -296,8 +307,7 @@ export const handleSimulateFeePayment: RequestHandler = async (req, res) => {
 
     await updateWithdrawal(email, withdrawal);
 
-    // 5. REGRA DE NEGÓCIO: Resetar o votingStreak após o saque
-    // Isso força o usuário a iniciar um novo ciclo de 20 dias para o próximo saque
+    // 5. REGRA DE NEGÓCIO: resetar streak/contador de dias após saque concluído
     const updatedUserData = await getUserByEmail(email);
     if (updatedUserData) {
       updatedUserData.profile.votingStreak = 0;

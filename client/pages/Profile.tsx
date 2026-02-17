@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
+import { SYSTEM_STARTING_BALANCE } from "@/lib/constants";
 import { BalanceInfo, Transaction } from "@shared/api";
 import Layout from "@/components/Layout";
-import WithdrawalBlockedModal from "@/components/WithdrawalBlockedModal";
 import EditNameModal from "@/components/EditNameModal";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import {
@@ -27,12 +27,10 @@ export default function Profile() {
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<any>(null);
-  const [withdrawMethod, setWithdrawMethod] = useState("bank-transfer");
   const [withdrawing, setWithdrawing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const user = getUser();
 
@@ -123,13 +121,7 @@ export default function Profile() {
       navigate(`/withdraw/bank-details/${response.withdrawalId}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to process withdrawal";
-      
-      // Check if error is about voting streak requirement
-      if (errorMessage.includes("consecutive days")) {
-        setShowBlockedModal(true);
-      } else {
-        setError(errorMessage);
-      }
+      setError(errorMessage);
     } finally {
       setWithdrawing(false);
     }
@@ -191,7 +183,7 @@ export default function Profile() {
 
   // Progresso baseado no saldo mínimo de $3500
   const MINIMUM_WITHDRAWAL = 3500;
-  const currentBalance = user?.balance || 0;
+  const currentBalance = balance.user.balance || 0;
   const progressPercent = Math.min((currentBalance / MINIMUM_WITHDRAWAL) * 100, 100);
   const amountRemaining = Math.max(0, MINIMUM_WITHDRAWAL - currentBalance);
 
@@ -214,7 +206,9 @@ export default function Profile() {
                 </div>
                 <Wallet className="h-8 w-8 opacity-80" />
               </div>
-              <p className="text-sm opacity-80">Starting balance was $213.19</p>
+              <p className="text-sm opacity-80">
+                Starting balance was ${SYSTEM_STARTING_BALANCE.toFixed(2)}
+              </p>
             </div>
 
             {/* Withdrawal */}
@@ -442,7 +436,7 @@ export default function Profile() {
                     EARNINGS
                   </p>
                   <p className="font-bold">
-                    ${((user?.balance || 0) - 213.19).toFixed(2)}
+                    ${((user?.balance || 0) - SYSTEM_STARTING_BALANCE).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -461,14 +455,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-
-      {/* Withdrawal Blocked Modal */}
-      <WithdrawalBlockedModal
-        isOpen={showBlockedModal}
-        onClose={() => setShowBlockedModal(false)}
-        currentStreak={balance?.user?.votingStreak || 0}
-        requiredStreak={50}
-      />
 
       {/* Delete Account Modal */}
       <DeleteAccountModal
