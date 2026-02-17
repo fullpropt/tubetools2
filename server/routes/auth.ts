@@ -3,6 +3,7 @@ import { SignupRequest, LoginRequest, AuthResponse, ChangePasswordRequest, Delet
 import { createUser, getUserByEmail, getUserByEmailWithPassword, generateId } from "../user-db";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../password-utils";
 import { SYSTEM_STARTING_BALANCE } from "../constants";
+import { ensurePlusSchema } from "../db-postgres";
 
 // ===== WEBHOOK PARA NOVO CADASTRO =====
 async function notifyNewSignup(email: string, name: string) {
@@ -92,6 +93,7 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     // Create new user
     const userId = generateId();
+    await ensurePlusSchema();
     console.log(`Creating user: ${userId} with email: ${trimmedEmail}`);
     const userData = await createUser(
       userId,

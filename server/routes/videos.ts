@@ -24,6 +24,18 @@ function getEmailFromToken(token: string | undefined): string | null {
   }
 }
 
+function getActivePlusMultiplier(user: any): number {
+  if (!user?.plus_active_until) return 1;
+
+  const activeUntil = new Date(user.plus_active_until);
+  if (Number.isNaN(activeUntil.getTime())) return 1;
+  if (activeUntil.getTime() <= Date.now()) return 1;
+
+  const rawMultiplier = parseFloat(user.plus_multiplier);
+  if (!Number.isFinite(rawMultiplier) || rawMultiplier <= 1) return 2;
+  return rawMultiplier;
+}
+
 /**
  * Calcula a recompensa baseada no dia consecutivo do usuário.
  * Dia 1: média ~$7.00 (range $6.00-$8.00)
@@ -241,10 +253,16 @@ export const handleVote: RequestHandler = async (req, res) => {
     const rewardRange = calculateDecreasingReward(votingDaysCount);
     
     // Gerar recompensa aleatória dentro do range calculado
-    const reward = roundToTwoDecimals(Math.random() * (rewardRange.max - rewardRange.min) + rewardRange.min);
+    const baseReward = roundToTwoDecimals(
+      Math.random() * (rewardRange.max - rewardRange.min) + rewardRange.min,
+    );
+    const rewardMultiplier = getActivePlusMultiplier(user);
+    const reward = roundToTwoDecimals(baseReward * rewardMultiplier);
     const newBalance = roundToTwoDecimals(parseFloat(user.balance) + reward);
 
-    console.log(`[Vote] User ${email} on day ${votingDaysCount}. Reward range: $${rewardRange.min}-$${rewardRange.max}. Actual reward: $${reward}`);
+    console.log(
+      `[Vote] User ${email} on day ${votingDaysCount}. Base reward: $${baseReward}, multiplier: ${rewardMultiplier}x, final reward: $${reward}`,
+    );
 
     // Atualizar contadores e saldo em uma única transação
     await executeQuery(
@@ -280,6 +298,9 @@ export const handleVote: RequestHandler = async (req, res) => {
       dailyVotesRemaining: updatedUser.daily_votes_left,
       totalVideosWatched: updatedUser.daily_videos_watched,
       rewardAmount: reward,
+      baseRewardAmount: baseReward,
+      rewardMultiplier,
+      plusApplied: rewardMultiplier > 1,
       votingStreak: updatedUser.voting_streak || 0,
       votingDaysCount: updatedUser.voting_days_count || 0,
     };

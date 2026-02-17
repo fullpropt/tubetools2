@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 
 let pool: Pool | null = null;
+let plusSchemaReady = false;
 
 export function getPool() {
   if (!pool) {
@@ -81,6 +82,25 @@ export async function executeSingleQuery(sql: string, params: any[] = []) {
     );
     throw err;
   }
+}
+
+export async function ensurePlusSchema() {
+  if (plusSchemaReady) return;
+
+  await executeQuery(
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS plus_new_user_eligible BOOLEAN NOT NULL DEFAULT FALSE",
+  );
+  await executeQuery(
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS plus_active_until TIMESTAMP WITH TIME ZONE NULL",
+  );
+  await executeQuery(
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS plus_activated_at TIMESTAMP WITH TIME ZONE NULL",
+  );
+  await executeQuery(
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS plus_multiplier DECIMAL(4, 2) NOT NULL DEFAULT 2.00",
+  );
+
+  plusSchemaReady = true;
 }
 
 export async function seedVideos() {

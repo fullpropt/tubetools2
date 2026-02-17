@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { isAuthenticated, getUser, setUser } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { SYSTEM_STARTING_BALANCE } from "@/lib/constants";
-import { BalanceInfo, Transaction } from "@shared/api";
+import {
+  BalanceInfo,
+  Transaction,
+  PlusStatusResponse,
+  PlusCheckoutResponse,
+} from "@shared/api";
 import Layout from "@/components/Layout";
 import EditNameModal from "@/components/EditNameModal";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
@@ -31,6 +36,10 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [plusStatus, setPlusStatus] = useState<PlusStatusResponse | null>(null);
+  const [plusLoading, setPlusLoading] = useState(false);
+  const [plusCheckoutLoading, setPlusCheckoutLoading] = useState(false);
+  const [plusMessage, setPlusMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const user = getUser();
 
@@ -43,6 +52,7 @@ export default function Profile() {
     // Load balance and transactions on mount
     loadBalance();
     loadTransactions();
+    loadPlusStatus();
     
     return () => {
       if (intervalRef.current) {
@@ -93,6 +103,35 @@ export default function Profile() {
       console.error("Transactions error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPlusStatus = async () => {
+    setPlusLoading(true);
+    try {
+      const data = await apiGet<PlusStatusResponse>("/api/plus/status");
+      setPlusStatus(data);
+      setPlusMessage("");
+    } catch (err) {
+      console.error("Plus status error:", err);
+      setPlusStatus(null);
+    } finally {
+      setPlusLoading(false);
+    }
+  };
+
+  const handleStartPlusCheckout = async () => {
+    setPlusCheckoutLoading(true);
+    setPlusMessage("");
+    try {
+      const data = await apiPost<PlusCheckoutResponse>("/api/plus/checkout", {});
+      window.location.href = data.checkoutUrl;
+    } catch (err) {
+      setPlusMessage(
+        err instanceof Error ? err.message : "Failed to start Plus checkout",
+      );
+    } finally {
+      setPlusCheckoutLoading(false);
     }
   };
 
@@ -326,6 +365,59 @@ export default function Profile() {
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-900 dark:text-green-200 text-sm flex gap-2">
                   <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <p>{successMessage}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Plus Rewards */}
+            <div className="card-base space-y-3">
+              <h3 className="text-lg font-bold">Plus Rewards</h3>
+
+              {plusLoading ? (
+                <p className="text-sm text-muted-foreground">Loading Plus status...</p>
+              ) : !plusStatus ? (
+                <p className="text-sm text-muted-foreground">
+                  Unable to load Plus status right now.
+                </p>
+              ) : plusStatus.active ? (
+                <div className="space-y-1">
+                  <p className="font-semibold text-green-600">
+                    Plus active: {plusStatus.multiplier.toFixed(2)}x rewards
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Active until{" "}
+                    {plusStatus.activeUntil
+                      ? new Date(plusStatus.activeUntil).toLocaleString()
+                      : "-"}
+                  </p>
+                </div>
+              ) : plusStatus.eligible ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    New-user Plus: get doubled rewards for 30 days after payment.
+                  </p>
+                  <button
+                    onClick={handleStartPlusCheckout}
+                    disabled={plusCheckoutLoading || !plusStatus.checkoutConfigured}
+                    className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {plusCheckoutLoading ? "Redirecting..." : "Activate Plus"}
+                  </button>
+                  {!plusStatus.checkoutConfigured && (
+                    <p className="text-xs text-amber-600">
+                      Plus checkout link is not configured yet.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Plus is available once for new accounts only.
+                </p>
+              )}
+
+              {plusMessage && (
+                <div className="p-2 rounded-lg bg-destructive/10 text-destructive text-xs">
+                  {plusMessage}
                 </div>
               )}
             </div>

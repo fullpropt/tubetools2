@@ -12,6 +12,10 @@ export interface UserProfile {
   lastVotedAt: string | null;
   lastVoteDateReset: string | null;
   votingDaysCount: number;
+  plusNewUserEligible?: boolean;
+  plusActiveUntil?: string | null;
+  plusActivatedAt?: string | null;
+  plusMultiplier?: number;
 }
 
 export interface Vote {
@@ -123,6 +127,10 @@ export async function loadUserData(email: string): Promise<UserData | null> {
       lastVotedAt: user.last_voted_at,
       lastVoteDateReset: user.last_vote_date_reset,
       votingDaysCount: user.voting_days_count || 0,
+      plusNewUserEligible: !!user.plus_new_user_eligible,
+      plusActiveUntil: user.plus_active_until || null,
+      plusActivatedAt: user.plus_activated_at || null,
+      plusMultiplier: user.plus_multiplier ? parseFloat(user.plus_multiplier) : 2,
     };
 
     return {
@@ -183,8 +191,11 @@ export async function createUser(
 
   try {
     await executeQuery(
-      `INSERT INTO users (id, email, name, balance, created_at, voting_streak, voting_days_count, password_hash)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      `INSERT INTO users (
+         id, email, name, balance, created_at, voting_streak, voting_days_count,
+         password_hash, plus_new_user_eligible, plus_multiplier
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, 2.00)`,
       [id, normalizedEmail, name.trim(), initialBalance, now, 0, 0, passwordHash || null],
     );
 
@@ -199,6 +210,10 @@ export async function createUser(
       lastVotedAt: null,
       lastVoteDateReset: null,
       votingDaysCount: 0,
+      plusNewUserEligible: true,
+      plusActiveUntil: null,
+      plusActivatedAt: null,
+      plusMultiplier: 2,
     };
 
     return {

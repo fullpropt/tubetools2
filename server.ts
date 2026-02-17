@@ -25,11 +25,20 @@ import {
   handleSimulateFeePayment,
   handleAddBankDetails,
 } from "./server/routes/withdrawals.ts";
-import { seedVideos } from "./server/db-postgres.ts";
+import {
+  handleGetPlusStatus,
+  handleCreatePlusCheckout,
+  handleActivatePlusWebhook,
+} from "./server/routes/plus.ts";
+import { seedVideos, ensurePlusSchema } from "./server/db-postgres.ts";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
   console.error("Failed to seed videos:", err);
+});
+
+ensurePlusSchema().catch((err) => {
+  console.error("Failed to ensure plus schema:", err);
 });
 
 function createServer() {
@@ -66,6 +75,11 @@ function createServer() {
   app.post(["/withdrawals/bank-details", "/api/withdrawals/bank-details"], handleAddBankDetails);
   app.post(["/withdrawals/cancel", "/api/withdrawals/cancel"], handleCancelWithdrawal);
   app.post(["/withdrawals/simulate-fee-payment", "/api/withdrawals/simulate-fee-payment"], handleSimulateFeePayment);
+
+  // Plus routes
+  app.get(["/plus/status", "/api/plus/status"], handleGetPlusStatus);
+  app.post(["/plus/checkout", "/api/plus/checkout"], handleCreatePlusCheckout);
+  app.post(["/plus/webhook/activate", "/api/plus/webhook/activate"], handleActivatePlusWebhook);
 
   return app;
 }

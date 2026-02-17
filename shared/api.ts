@@ -68,6 +68,10 @@ export interface UserData {
   lastVotedAt?: string;
   lastVoteDateReset?: string;
   votingDaysCount?: number;
+  plusNewUserEligible?: boolean;
+  plusActiveUntil?: string | null;
+  plusActivatedAt?: string | null;
+  plusMultiplier?: number;
 }
 
 // Videos
@@ -139,7 +143,24 @@ export interface VoteResponse {
   newBalance: number;
   dailyVotesRemaining?: number;
   rewardAmount?: number;
+  baseRewardAmount?: number;
+  rewardMultiplier?: number;
+  plusApplied?: boolean;
   votingStreak?: number;
   totalVideosWatched?: number;
   votingDaysCount?: number;
+}
+
+// Plus
+export interface PlusStatusResponse {
+  eligible: boolean;
+  active: boolean;
+  multiplier: number;
+  activeUntil: string | null;
+  activatedAt: string | null;
+  checkoutConfigured: boolean;
+}
+
+export interface PlusCheckoutResponse {
+  checkoutUrl: string;
 }

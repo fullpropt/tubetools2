@@ -13,7 +13,11 @@ CREATE TABLE IF NOT EXISTS users (
     voting_streak INTEGER DEFAULT 0,
     last_voted_at TIMESTAMP WITH TIME ZONE NULL,
     last_vote_date_reset TIMESTAMP WITH TIME ZONE NULL,
-    voting_days_count INTEGER DEFAULT 0
+    voting_days_count INTEGER DEFAULT 0,
+    plus_new_user_eligible BOOLEAN NOT NULL DEFAULT FALSE,
+    plus_active_until TIMESTAMP WITH TIME ZONE NULL,
+    plus_activated_at TIMESTAMP WITH TIME ZONE NULL,
+    plus_multiplier DECIMAL(4, 2) NOT NULL DEFAULT 2.00
 );
 
 -- Trigger para atualizar o campo updated_at automaticamente
