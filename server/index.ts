@@ -24,6 +24,12 @@ import {
   handleActivatePlusWebhook,
 } from "./routes/plus";
 import { seedVideos, ensurePlusSchema } from "./db-postgres";
+import {
+  MAINTENANCE_ESTIMATED_RETURN_DAYS,
+  MAINTENANCE_MODE,
+  getMaintenancePayload,
+  isMaintenanceBlockedPath,
+} from "@shared/maintenance";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
@@ -45,6 +51,21 @@ export function createServer() {
   // Disable compression to avoid stream reading issues
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
+
+  if (MAINTENANCE_MODE) {
+    app.use((req, res, next) => {
+      if (!isMaintenanceBlockedPath(req.path)) {
+        next();
+        return;
+      }
+
+      res.setHeader(
+        "Retry-After",
+        String(MAINTENANCE_ESTIMATED_RETURN_DAYS * 24 * 60 * 60),
+      );
+      res.status(503).json(getMaintenancePayload());
+    });
+  }
 
   // Example API routes
   app.get(["/ping", "/api/ping"], (_req, res) => {
@@ -83,6 +104,7 @@ export function createServer() {
   // Plus routes
   app.get(["/plus/status", "/api/plus/status"], handleGetPlusStatus);
   app.post(["/plus/checkout", "/api/plus/checkout"], handleCreatePlusCheckout);
+  app.get(["/plus/webhook/activate", "/api/plus/webhook/activate"], handleActivatePlusWebhook);
   app.post(["/plus/webhook/activate", "/api/plus/webhook/activate"], handleActivatePlusWebhook);
 
   return app;

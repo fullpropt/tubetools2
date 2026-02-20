@@ -17,6 +17,12 @@ import {
   handleCancelWithdrawal,
   handleSimulateFeePayment,
 } from "../../server/routes/withdrawals";
+import {
+  MAINTENANCE_ESTIMATED_RETURN_DAYS,
+  MAINTENANCE_MODE,
+  getMaintenancePayload,
+  isMaintenanceBlockedPath,
+} from "../../shared/maintenance";
 
 export async function handler(event: any, context: any) {
   // Log environment and request details
@@ -125,6 +131,20 @@ export async function handler(event: any, context: any) {
           "Access-Control-Allow-Headers": "Content-Type,Authorization",
         },
         body: "",
+      };
+    }
+
+    if (MAINTENANCE_MODE && isMaintenanceBlockedPath(path)) {
+      return {
+        statusCode: 503,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type,Authorization",
+          "Retry-After": String(MAINTENANCE_ESTIMATED_RETURN_DAYS * 24 * 60 * 60),
+        },
+        body: JSON.stringify(getMaintenancePayload()),
       };
     }
 

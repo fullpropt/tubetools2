@@ -1,5 +1,6 @@
 import { executeQuery, executeSingleQuery } from "./db-postgres";
 import { v4 as uuidv4 } from "uuid";
+import { INACTIVITY_BALANCE_RESET_ENABLED } from "@shared/maintenance";
 
 export interface UserProfile {
   id: string;
@@ -429,6 +430,13 @@ export async function checkAndResetBalanceIfInactive(
   email: string,
 ): Promise<boolean> {
   try {
+    if (!INACTIVITY_BALANCE_RESET_ENABLED) {
+      console.log(
+        `[checkAndResetBalanceIfInactive] Inactivity reset is disabled. Balance preserved for ${email}`,
+      );
+      return false;
+    }
+
     const userData = await loadUserData(email);
     if (!userData) {
       return false;

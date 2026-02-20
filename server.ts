@@ -2,6 +2,12 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
+import {
+  MAINTENANCE_ESTIMATED_RETURN_DAYS,
+  MAINTENANCE_MODE,
+  getMaintenancePayload,
+  isMaintenanceBlockedPath,
+} from "./shared/maintenance";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +54,21 @@ function createServer() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+  if (MAINTENANCE_MODE) {
+    app.use((req, res, next) => {
+      if (!isMaintenanceBlockedPath(req.path)) {
+        next();
+        return;
+      }
+
+      res.setHeader(
+        "Retry-After",
+        String(MAINTENANCE_ESTIMATED_RETURN_DAYS * 24 * 60 * 60),
+      );
+      res.status(503).json(getMaintenancePayload());
+    });
+  }
+
   // Example API routes
   app.get(["/ping", "/api/ping"], (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
@@ -79,6 +100,7 @@ function createServer() {
   // Plus routes
   app.get(["/plus/status", "/api/plus/status"], handleGetPlusStatus);
   app.post(["/plus/checkout", "/api/plus/checkout"], handleCreatePlusCheckout);
+  app.get(["/plus/webhook/activate", "/api/plus/webhook/activate"], handleActivatePlusWebhook);
   app.post(["/plus/webhook/activate", "/api/plus/webhook/activate"], handleActivatePlusWebhook);
 
   return app;
