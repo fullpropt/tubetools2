@@ -1,6 +1,6 @@
 import { executeQuery, executeSingleQuery } from "./db-postgres";
 import { v4 as uuidv4 } from "uuid";
-import { INACTIVITY_BALANCE_RESET_ENABLED } from "@shared/maintenance";
+import { INACTIVITY_BALANCE_RESET_ENABLED } from "../shared/maintenance";
 
 export interface UserProfile {
   id: string;

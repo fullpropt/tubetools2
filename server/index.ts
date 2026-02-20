@@ -29,7 +29,7 @@ import {
   MAINTENANCE_MODE,
   getMaintenancePayload,
   isMaintenanceBlockedPath,
-} from "@shared/maintenance";
+} from "../shared/maintenance";
 
 // Initialize database on startup
 seedVideos().catch((err) => {
