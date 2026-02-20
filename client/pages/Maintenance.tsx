@@ -14,7 +14,7 @@ export default function Maintenance() {
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-400/10 px-4 py-2 text-amber-100">
             <Wrench className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-[0.14em]">
-              Aviso Geral
+              General Notice
             </span>
           </div>
 
@@ -27,9 +27,9 @@ export default function Maintenance() {
           </p>
 
           <p className="mt-2 text-sm text-slate-300">
-            Previsao de retorno: aproximadamente{" "}
+            Estimated return: approximately{" "}
             <span className="font-semibold text-white">
-              {MAINTENANCE_ESTIMATED_RETURN_DAYS} dias
+              {MAINTENANCE_ESTIMATED_RETURN_DAYS} days
             </span>
             .
           </p>
@@ -38,7 +38,7 @@ export default function Maintenance() {
             <div className="flex items-center gap-2 text-emerald-100">
               <ShieldCheck className="h-5 w-5" />
               <span className="text-sm font-semibold">
-                Saldo e progresso preservados
+                Balance and progress preserved
               </span>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-emerald-50">

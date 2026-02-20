@@ -2,13 +2,13 @@ export const MAINTENANCE_MODE = true;
 
 export const MAINTENANCE_ESTIMATED_RETURN_DAYS = 5;
 
-export const MAINTENANCE_TITLE = "Plataforma em manutencao";
+export const MAINTENANCE_TITLE = "Platform Under Maintenance";
 
 export const MAINTENANCE_MESSAGE =
-  "Estamos em manutencao para melhorias no sistema e na seguranca. Voltaremos em breve.";
+  "We are currently under maintenance to improve system performance and security. We will be back soon.";
 
 export const MAINTENANCE_BALANCE_MESSAGE =
-  "Tudo continua como esta: nenhum saldo sera zerado por regra de inatividade durante a manutencao.";
+  "Everything will remain as it is: no balance will be reset due to inactivity during maintenance.";
 
 export const INACTIVITY_BALANCE_RESET_ENABLED = false;
 
